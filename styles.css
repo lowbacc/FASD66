@@ -20,19 +20,33 @@ body{background:var(--bg);color:var(--text);line-height:1.4}
 
 /* Hero / logo */
 .hero{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:80px 20px 40px}
-.logo-wrap{position:relative;width:min(80vmin,720px);height:min(80vmin,720px);display:block;outline:none}
-#fasd-logo{width:100%;height:100%;display:block;transition:transform .6s cubic-bezier(.2,.9,.2,1)}
-.half{position:absolute;top:0;bottom:0;width:50%;cursor:pointer;transition:transform .5s ease;z-index:10}
+.logo-wrap{position:relative;display:block;outline:none;overflow:hidden;margin:0 auto}
+
+/* FORCER TAILLE LOGO - règle finale */
+.logo-wrap {
+  width: min(92vmin, 920px) !important;
+  height: min(92vmin, 920px) !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  display: block !important;
+  overflow: visible !important;
+}
+
+/* Two-image technique */
+.logo-img{position:absolute;top:0;left:0;width:100% !important;height:100% !important;object-fit:contain;transition:transform .6s cubic-bezier(.2,.9,.2,1);pointer-events:none;will-change:transform;display:block !important}
+.logo-img.left{clip-path:polygon(0 0,50% 0,50% 100%,0 100%);transform-origin:left center}
+.logo-img.right{clip-path:polygon(50% 0,100% 0,100% 100%,50% 100%);transform-origin:right center}
+
+/* Hover / touched state */
+.half{position:absolute;top:0;bottom:0;width:50%;cursor:pointer;z-index:60}
 .half.left{left:0}
 .half.right{right:0}
 
-/* Hover / touched state: on desktop hover, on mobile .touched class */
-.logo-wrap:hover #fasd-logo,
-.logo-wrap.touched #fasd-logo{transform:scale(1.02)}
-.logo-wrap:hover .half.left{transform:translateX(-18%)}
-.logo-wrap:hover .half.right{transform:translateX(18%)}
-.logo-wrap.touched .half.left{transform:translateX(-18%)}
-.logo-wrap.touched .half.right{transform:translateX(18%)}
+/* Animation : translation des moitiés */
+.logo-wrap:hover .logo-img.left,
+.logo-wrap.touched .logo-img.left { transform: translateX(-18%); }
+.logo-wrap:hover .logo-img.right,
+.logo-wrap.touched .logo-img.right { transform: translateX(18%); }
 
 /* Hint text */
 .hint{margin-top:18px;color:var(--muted);font-size:0.95rem}
@@ -55,69 +69,11 @@ ul{padding-left:1.1rem}
 /* Responsive */
 @media (max-width:700px){
   .nav-list{display:none}
-  .logo-wrap{width:92vw;height:92vw}
+  .logo-wrap{width:96vw;height:96vw}
   .page-content{margin:100px 12px}
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion:reduce){
-  #fasd-logo, .half{transition:none}
+  .logo-img, .half {transition:none}
 }
-
-/* Sections et formulaire */
-.page-content{max-width:1000px;margin:120px auto 80px;padding:28px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:10px}
-.page-content h1{font-size:2rem;margin-bottom:0.5rem}
-.page-content h2{font-size:1.2rem;margin-top:1.2rem}
-.page-content p, .page-content li{color:var(--text);font-size:1rem}
-form label{display:block;margin:10px 0;color:var(--text)}
-form input, form textarea, form select{width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:var(--text)}
-form .btn{margin-top:10px}
-table thead th{background:rgba(255,255,255,0.02);font-weight:600}
-
-/* Animation pour SVG inline : déplace les groupes leftGroup / rightGroup */
-#leftGroup, #rightGroup {
-  transition: transform .6s cubic-bezier(.2,.9,.2,1);
-  transform-origin: 50% 50%;
-  will-change: transform;
-}
-
-/* Hover et tactile : séparation */
-.logo-wrap:hover #leftGroup,
-.logo-wrap.touched #leftGroup {
-  transform: translateX(-18%);
-}
-.logo-wrap:hover #rightGroup,
-.logo-wrap.touched #rightGroup {
-  transform: translateX(18%);
-}
-
-/* Amélioration visuelle : pointer pour les moitiés */
-.half { cursor: pointer; }
-
-/* Focus visible pour accessibilité */
-.logo-wrap:focus { outline: 3px solid rgba(0,119,204,0.25); outline-offset:6px; }
-
-/* Force l'affichage du SVG et protège contre overrides globaux */
-#fasd-logo {
-  display: block !important;
-  width: 100% !important;
-  height: 100% !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-
-/* Rendre tous les éléments internes visibles si un style global les masque */
-#fasd-logo * {
-  visibility: visible !important;
-  opacity: 1 !important;
-  fill-opacity: 1 !important;
-  stroke-opacity: 1 !important;
-}
-
-/* Si tu utilises l'inline SVG, assure-toi que les groupes animés restent visibles */
-#leftGroup, #rightGroup, #center { will-change: transform; }
-
-/* Si tu utilises encore la technique à deux images, désactive object-fit problématique */
-.logo-img, #fasd-logo { object-fit: contain; }

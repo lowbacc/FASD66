@@ -1,4 +1,4 @@
-// main.js : tactile, clavier et gestion du focus pour le logo inline
+// main.js : tactile, clavier et gestion du focus pour la version à deux images
 document.addEventListener('DOMContentLoaded', () => {
   const wrap = document.getElementById('logoWrap');
   if (!wrap) return;
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // amélioration : si l'utilisateur clique sur une .half alors que touched=false,
+  // si l'utilisateur clique sur une .half alors que touched=false,
   // on active touched d'abord (utile sur desktop si l'utilisateur clique directement)
   const halves = wrap.querySelectorAll('.half');
   halves.forEach(h => {
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!wrap.classList.contains('touched')) {
         ev.preventDefault();
         wrap.classList.add('touched');
-        // si l'utilisateur clique à nouveau sur la même moitié dans les 2s, on suit le lien
+        // si l'utilisateur clique à nouveau sur la même moitié dans les 3s, on suit le lien
         setTimeout(() => { wrap.classList.remove('touched'); }, 3000);
       }
     });
