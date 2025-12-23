@@ -1,4 +1,4 @@
-// main.js : tactile, clavier et gestion du focus pour la version à deux images + formulaire
+// main.js : tactile, clavier et gestion du focus pour la version à deux images + formulaire(s)
 document.addEventListener('DOMContentLoaded', () => {
   const wrap = document.getElementById('logoWrap');
   if (wrap) {
@@ -39,20 +39,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Formulaire : validation simple et message de retour (fonctionne sur index ou intellectuelle)
-  const form = document.getElementById('contactForm');
-  if (form) {
+  // Gestion des formulaires (plusieurs pages)
+  const handleForm = (formId) => {
+    const form = document.getElementById(formId);
+    if (!form) return;
     const note = form.querySelector('.form-note');
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       if (!form.checkValidity()) {
-        note.textContent = 'Merci de compléter les champs requis.';
-        note.style.color = '#f6b0b0';
+        if (note) { note.textContent = 'Merci de compléter les champs requis.'; note.style.color = '#f6b0b0'; }
         return;
       }
-      note.textContent = 'Merci — votre demande a bien été reçue.';
-      note.style.color = '#bff0d6';
+      if (note) { note.textContent = 'Merci — votre demande a bien été reçue.'; note.style.color = '#bff0d6'; }
       form.reset();
     });
-  }
+  };
+
+  // forms on different pages
+  handleForm('contactForm');       // intellectuelle
+  handleForm('contactFormPhys');   // physique
 });

@@ -8,58 +8,83 @@
 </head>
 <body>
   <header class="site-header">
-    <nav class="main-nav" aria-label="Navigation principale">
-      <a class="nav-logo" href="index.html">FASD</a>
-      <ul class="nav-list">
-        <li><a href="index.html">Accueil</a></li>
-        <li><a href="intellectuelle.html">Défense Intellectuelle</a></li>
-      </ul>
-    </nav>
+    <div class="header-inner">
+      <a class="logo-link" href="index.html" aria-label="Accueil FASD">
+        <!-- petit logo : conserve src vers assets/logo.svg -->
+        <img class="logo-small" src="assets/logo.svg" alt="FASD" />
+      </a>
+    </div>
   </header>
 
-  <main class="page-content" id="physique">
-    <h1>Défense Physique</h1>
 
-    <section id="qui-sommes-nous">
-      <h2>Qui sommes‑nous</h2>
-      <p>FASD propose des cours de self‑defense accessibles à tous. Nos encadrants sont formés et expérimentés, et nous privilégions la sécurité, la pédagogie et la progression adaptée à chaque participant.</p>
-    </section>
+  <main class="page-main">
+    <div class="page-content">
+      <h1>Défense Physique</h1>
+      <p>Nos ateliers de défense physique combinent techniques de prévention, postures et exercices pratiques pour gagner en confiance et en sécurité.</p>
 
-    <section id="activites">
-      <h2>Activités</h2>
+      <h2>Événements à venir</h2>
       <ul>
-        <li><strong>Atelier Débutant</strong> — techniques de base, posture, déséquilibre, sorties simples (1h30).</li>
-        <li><strong>Atelier Intermédiaire</strong> — enchaînements, gestion du stress, mises en situation (1h30).</li>
-        <li><strong>Stage Intensif</strong> — week‑end pratique, simulations et prévention.</li>
+        <li><strong>12 mars</strong> — Conférence "Distinguer info et rumeur" (session d'introduction)</li>
+        <li><strong>26 avril</strong> — Atelier pratique : mise en situation et techniques de base</li>
       </ul>
-    </section>
 
-    <section id="horaires">
-      <h2>Horaires et Lieux</h2>
-      <table>
-        <thead><tr><th>Jour</th><th>Horaire</th><th>Lieu</th></tr></thead>
-        <tbody>
-          <tr><td>Mardi</td><td>19:00–20:30</td><td>Gymnase Municipal</td></tr>
-          <tr><td>Samedi</td><td>10:00–12:00</td><td>Maison des Associations</td></tr>
-        </tbody>
-      </table>
-    </section>
+      <h2>Programme</h2>
+      <ul>
+        <li>Prévention et awareness</li>
+        <li>Techniques de désengagement</li>
+        <li>Exercices pratiques en binôme</li>
+      </ul>
 
-    <section id="tarifs">
-      <h2>Tarifs</h2>
-      <p><strong>Adhésion annuelle</strong> : 30 € — <strong>Forfait mensuel</strong> : 25 € / mois. Tarifs réduits pour étudiants et demandeurs d’emploi.</p>
-    </section>
+      <!-- Contact / Inscription (ajouté ici) -->
+      <section class="contact-section" aria-labelledby="contactTitlePhys">
+        <h2 id="contactTitlePhys">Contact · Inscription</h2>
+        <p class="contact-sub">Remplis le formulaire pour recevoir des infos ou t’inscrire aux ateliers.</p>
 
-    <section id="inscription">
-      <h2>Inscription</h2>
-      <p>Pour vous inscrire, utilisez le formulaire de contact sur la page Défense Intellectuelle (section Contact) ou envoyez un email à <strong>contact@fasd.example</strong>.</p>
-      <a class="btn" href="intellectuelle.html#contact">Contact / Inscription</a>
-    </section>
+        <form id="contactFormPhys" class="contact-form" novalidate>
+          <div class="row">
+            <label for="fullname-phys">Nom complet</label>
+            <input id="fullname-phys" name="fullname" type="text" required autocomplete="name" />
+          </div>
+
+          <div class="row">
+            <label for="email-phys">Email</label>
+            <input id="email-phys" name="email" type="email" required autocomplete="email" />
+          </div>
+
+          <div class="row">
+            <label for="interest-phys">Intérêt</label>
+            <select id="interest-phys" name="interest">
+              <option>Défense Physique</option>
+              <option>Défense Intellectuelle</option>
+              <option>Les deux</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <label for="message-phys">Message</label>
+            <textarea id="message-phys" name="message" rows="4" placeholder="Dis-nous ce qui t'intéresse"></textarea>
+          </div>
+
+          <div class="row row-inline">
+            <label class="checkbox">
+              <input id="consent-phys" name="consent" type="checkbox" required />
+              <span>J’accepte que mes données soient utilisées pour répondre</span>
+            </label>
+          </div>
+
+          <div class="row actions">
+            <button type="submit" class="btn primary">Envoyer</button>
+            <span class="form-note" aria-live="polite"></span>
+          </div>
+        </form>
+      </section>
+    </div>
   </main>
 
   <footer class="site-footer">
-    <a class="back-home" href="index.html">← Retour à l’accueil</a>
     <p>© FASD — Association</p>
   </footer>
+
+  <script src="main.js"></script>
 </body>
 </html>
