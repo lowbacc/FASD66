@@ -63,3 +63,13 @@ ul{padding-left:1.1rem}
 @media (prefers-reduced-motion:reduce){
   #fasd-logo, .half{transition:none}
 }
+
+/* Sections et formulaire */
+.page-content{max-width:1000px;margin:120px auto 80px;padding:28px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:10px}
+.page-content h1{font-size:2rem;margin-bottom:0.5rem}
+.page-content h2{font-size:1.2rem;margin-top:1.2rem}
+.page-content p, .page-content li{color:var(--text);font-size:1rem}
+form label{display:block;margin:10px 0;color:var(--text)}
+form input, form textarea, form select{width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:var(--text)}
+form .btn{margin-top:10px}
+table thead th{background:rgba(255,255,255,0.02);font-weight:600}
