@@ -9,79 +9,69 @@
 <body>
   <header class="site-header">
     <nav class="main-nav" aria-label="Navigation principale">
-      <a class="nav-logo" href="index.html">FASD</a>
+      <a class="nav-logo" href="index.html" aria-label="Accueil FASD">FASD</a>
       <ul class="nav-list">
-        <li><a href="index.html">Accueil</a></li>
         <li><a href="physique.html">Défense Physique</a></li>
+        <li><a href="intellectuelle.html">Défense Intellectuelle</a></li>
       </ul>
     </nav>
   </header>
 
-  <main class="page-content" id="intellectuelle">
-    <h1>Défense Intellectuelle</h1>
+  <main class="page-main">
+    <div class="page-content">
+      <h1>Défense Intellectuelle</h1>
+      <p>Présentation, objectifs et ateliers autour de la vérification de l'information.</p>
 
-    <section id="qui-sommes-nous">
-      <h2>Qui sommes‑nous</h2>
-      <p>La section zététique de FASD vise à développer l’esprit critique, la vérification des sources et la capacité à repérer les raisonnements fallacieux. Nos ateliers sont pratiques et participatifs.</p>
-    </section>
+      <!-- Contact / Inscription (ici uniquement) -->
+      <section class="contact-section" aria-labelledby="contactTitle">
+        <h2 id="contactTitle">Contact · Inscription</h2>
+        <p class="contact-sub">Remplis le formulaire pour recevoir des infos ou t’inscrire aux ateliers.</p>
 
-    <section id="activites">
-      <h2>Activités</h2>
-      <ul>
-        <li><strong>Atelier Esprit Critique</strong> — méthodes de vérification, biais cognitifs, évaluation de sources.</li>
-        <li><strong>Conférences</strong> — intervenants invités sur des thèmes scientifiques et médiatiques.</li>
-        <li><strong>Groupes de lecture</strong> — analyse critique d’articles et d’ouvrages.</li>
-      </ul>
-    </section>
+        <form id="contactForm" class="contact-form" novalidate>
+          <div class="row">
+            <label for="fullname">Nom complet</label>
+            <input id="fullname" name="fullname" type="text" required autocomplete="name" />
+          </div>
 
-    <section id="calendrier">
-      <h2>Événements à venir</h2>
-      <ul>
-        <li>12 mars — Conférence "Distinguer info et rumeur"</li>
-        <li>26 avril — Atelier pratique : vérification de sources</li>
-      </ul>
-    </section>
+          <div class="row">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required autocomplete="email" />
+          </div>
 
-    <section id="ressources">
-      <h2>Ressources</h2>
-      <p>Nous mettons à disposition des fiches pratiques et des liens utiles pour apprendre à vérifier une information et comprendre les méthodes scientifiques de base.</p>
-    </section>
+          <div class="row">
+            <label for="interest">Intérêt</label>
+            <select id="interest" name="interest">
+              <option>Défense Intellectuelle</option>
+              <option>Défense Physique</option>
+              <option>Les deux</option>
+            </select>
+          </div>
 
-    <section id="contact">
-      <h2>Contact / Inscription</h2>
-      <p>Remplis le formulaire ci‑dessous pour recevoir des infos ou t’inscrire aux ateliers.</p>
+          <div class="row">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" rows="4" placeholder="Dis-nous ce qui t'intéresse"></textarea>
+          </div>
 
-      <form id="contact-form" method="POST" action="https://formspree.io/f/TON_ENDPOINT">
-        <label>Nom complet
-          <input name="name" required />
-        </label>
+          <div class="row row-inline">
+            <label class="checkbox">
+              <input id="consent" name="consent" type="checkbox" required />
+              <span>J’accepte que mes données soient utilisées pour répondre</span>
+            </label>
+          </div>
 
-        <label>Email
-          <input type="email" name="email" required />
-        </label>
-
-        <label>Intérêt
-          <select name="interest">
-            <option>Défense Intellectuelle</option>
-            <option>Défense Physique</option>
-            <option>Les deux</option>
-          </select>
-        </label>
-
-        <label>Message
-          <textarea name="message" rows="4"></textarea>
-        </label>
-
-        <label><input type="checkbox" name="consent" required /> J’accepte que mes données soient utilisées pour répondre</label>
-
-        <button class="btn" type="submit">Envoyer</button>
-      </form>
-    </section>
+          <div class="row actions">
+            <button type="submit" class="btn primary">Envoyer</button>
+            <span class="form-note" aria-live="polite"></span>
+          </div>
+        </form>
+      </section>
+    </div>
   </main>
 
   <footer class="site-footer">
-    <a class="back-home" href="index.html">← Retour à l’accueil</a>
     <p>© FASD — Association</p>
   </footer>
+
+  <script src="main.js"></script>
 </body>
 </html>
