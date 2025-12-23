@@ -1,0 +1,65 @@
+:root{
+  --bg:#0f1720;
+  --card:#ffffff;
+  --accent:#0077cc;
+  --text:#eaeef2;
+  --muted:#9aa6b2;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+body{background:var(--bg);color:var(--text);line-height:1.4}
+
+/* Header */
+.site-header{background:transparent;padding:12px 20px;position:fixed;left:0;right:0;top:0;z-index:40}
+.main-nav{display:flex;align-items:center;justify-content:space-between;max-width:1100px;margin:0 auto}
+.nav-logo{color:var(--text);text-decoration:none;font-weight:700}
+.nav-list{list-style:none;display:flex;gap:16px;margin:0;padding:0}
+.nav-list a{color:var(--muted);text-decoration:none;padding:6px 8px;border-radius:6px}
+.nav-list a:hover, .nav-list a:focus{background:rgba(255,255,255,0.04);color:var(--text)}
+
+/* Hero / logo */
+.hero{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:80px 20px 40px}
+.logo-wrap{position:relative;width:min(80vmin,720px);height:min(80vmin,720px);display:block;outline:none}
+#fasd-logo{width:100%;height:100%;display:block;transition:transform .6s cubic-bezier(.2,.9,.2,1)}
+.half{position:absolute;top:0;bottom:0;width:50%;cursor:pointer;transition:transform .5s ease;z-index:10}
+.half.left{left:0}
+.half.right{right:0}
+
+/* Hover / touched state: on desktop hover, on mobile .touched class */
+.logo-wrap:hover #fasd-logo,
+.logo-wrap.touched #fasd-logo{transform:scale(1.02)}
+.logo-wrap:hover .half.left{transform:translateX(-18%)}
+.logo-wrap:hover .half.right{transform:translateX(18%)}
+.logo-wrap.touched .half.left{transform:translateX(-18%)}
+.logo-wrap.touched .half.right{transform:translateX(18%)}
+
+/* Hint text */
+.hint{margin-top:18px;color:var(--muted);font-size:0.95rem}
+
+/* Page content */
+.page-content{max-width:1000px;margin:120px auto 80px;padding:20px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:10px}
+h1{color:var(--card);margin-top:0}
+h2{color:var(--text);margin-bottom:8px}
+table{width:100%;border-collapse:collapse;background:transparent;color:var(--text)}
+table th, table td{padding:10px;border:1px solid rgba(255,255,255,0.06);text-align:left}
+ul{padding-left:1.1rem}
+
+/* Buttons */
+.btn{display:inline-block;background:var(--accent);color:#fff;padding:8px 14px;border-radius:6px;text-decoration:none}
+.back-home{color:var(--muted);text-decoration:none}
+
+/* Footer */
+.site-footer{padding:20px;text-align:center;color:var(--muted)}
+
+/* Responsive */
+@media (max-width:700px){
+  .nav-list{display:none}
+  .logo-wrap{width:92vw;height:92vw}
+  .page-content{margin:100px 12px}
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion:reduce){
+  #fasd-logo, .half{transition:none}
+}
