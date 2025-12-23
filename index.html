@@ -4,6 +4,85 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FASD — Accueil</title>
+
+  <!-- Styles essentiels pour l'effet de séparation (copie aussi dans styles.css si tu veux centraliser) -->
+  <style>
+    :root{
+      --bg:#0f1720;
+      --text:#eaeef2;
+      --muted:#9aa6b2;
+      --accent:#0077cc;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    body{background:var(--bg);color:var(--text);line-height:1.4}
+
+    /* Header */
+    .site-header{background:transparent;padding:12px 20px;position:fixed;left:0;right:0;top:0;z-index:40}
+    .main-nav{display:flex;align-items:center;justify-content:space-between;max-width:1100px;margin:0 auto}
+    .nav-logo{color:var(--text);text-decoration:none;font-weight:700}
+    .nav-list{list-style:none;display:flex;gap:16px;margin:0;padding:0}
+    .nav-list a{color:var(--muted);text-decoration:none;padding:6px 8px;border-radius:6px}
+    .nav-list a:hover, .nav-list a:focus{background:rgba(255,255,255,0.04);color:var(--text)}
+
+    /* Hero / logo container */
+    .hero{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;padding:80px 20px 40px}
+    .logo-wrap{
+      position:relative;
+      width:min(80vmin,720px);
+      height:min(80vmin,720px);
+      display:block;
+      overflow:hidden;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Two-image technique */
+    .logo-img{
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      transition:transform .6s cubic-bezier(.2,.9,.2,1);
+      pointer-events:none; /* laisse les .half capter les clics */
+      will-change:transform;
+    }
+
+    /* clip left / right */
+    .logo-img.left{clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%); transform-origin:left center}
+    .logo-img.right{clip-path: polygon(50% 0, 100% 0, 100% 100%, 50% 100%); transform-origin:right center}
+
+    /* movement on hover / touched */
+    .logo-wrap:hover .logo-img.left,
+    .logo-wrap.touched .logo-img.left { transform: translateX(-18%); }
+    .logo-wrap:hover .logo-img.right,
+    .logo-wrap.touched .logo-img.right { transform: translateX(18%); }
+
+    /* clickable halves above images */
+    .half{position:absolute;top:0;bottom:0;width:50%;z-index:30}
+    .half.left{left:0}
+    .half.right{right:0}
+
+    /* hint text */
+    .hint{margin-top:18px;color:var(--muted);font-size:0.95rem}
+
+    /* page content fallback */
+    .page-content{max-width:1000px;margin:120px auto 80px;padding:20px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:10px}
+    h1{color:var(--text);margin-top:0}
+    .site-footer{padding:20px;text-align:center;color:var(--muted)}
+
+    @media (max-width:700px){
+      .nav-list{display:none}
+      .logo-wrap{width:92vw;height:92vw}
+      .page-content{margin:100px 12px}
+    }
+
+    @media (prefers-reduced-motion:reduce){
+      .logo-img{transition:none}
+    }
+  </style>
+
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -19,10 +98,11 @@
 
   <main class="hero" id="hero">
     <div class="logo-wrap" id="logoWrap" tabindex="0" aria-label="Logo interactif FASD">
-      <!-- Utilise ton fichier SVG dans assets/ -->
-      <img id="fasd-logo" src="assets/logo.svg" alt="FASD — Auto défense physique et intellectuelle" />
+      <!-- Deux fois la même image : gauche et droite, masquées par clip-path -->
+      <img class="logo-img left" src="assets/logo.svg" alt="FASD gauche — Défense Physique" />
+      <img class="logo-img right" src="assets/logo.svg" alt="FASD droite — Défense Intellectuelle" />
 
-      <!-- zones cliquables superposées -->
+      <!-- zones cliquables superposées (captent les clics/taps) -->
       <a class="half left" href="physique.html" aria-label="Aller à la défense physique"></a>
       <a class="half right" href="intellectuelle.html" aria-label="Aller à la défense intellectuelle"></a>
     </div>
