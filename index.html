@@ -19,64 +19,8 @@
 
   <main class="hero" id="hero">
     <div class="logo-wrap" id="logoWrap" tabindex="0" aria-label="Logo interactif FASD">
-      <!-- Inline SVG : remplace assets/logo.svg si tu veux -->
-      <!-- Si tu préfères utiliser ton propre SVG, remplace le contenu ci-dessous par le contenu de ton fichier assets/logo.svg -->
-      <svg id="fasd-logo" viewBox="0 0 800 800" role="img" aria-labelledby="logoTitle">
-        <title id="logoTitle">FASD — Auto défense physique et intellectuelle</title>
-
-        <!-- Bouclier de fond -->
-        <defs>
-          <linearGradient id="gLeft" x1="0" x2="1">
-            <stop offset="0" stop-color="#ffffff"/>
-            <stop offset="1" stop-color="#e6e6e6"/>
-          </linearGradient>
-          <linearGradient id="gRight" x1="0" x2="1">
-            <stop offset="0" stop-color="#111111"/>
-            <stop offset="1" stop-color="#333333"/>
-          </linearGradient>
-
-          <!-- clip pour gauche/droite -->
-          <clipPath id="clipLeft">
-            <rect x="0" y="0" width="400" height="800" />
-          </clipPath>
-          <clipPath id="clipRight">
-            <rect x="400" y="0" width="400" height="800" />
-          </clipPath>
-        </defs>
-
-        <!-- Contour du bouclier (simple) -->
-        <rect x="50" y="50" width="700" height="700" rx="80" ry="80" fill="none" stroke="#666" stroke-width="6"/>
-
-        <!-- Gauche -->
-        <g id="leftGroup" clip-path="url(#clipLeft)">
-          <rect x="50" y="50" width="350" height="700" rx="60" ry="60" fill="url(#gLeft)"/>
-          <g transform="translate(120,220)" fill="#111">
-            <text x="0" y="-40" font-size="48" font-weight="700">FASD</text>
-            <text x="0" y="10" font-size="20">AUTO DÉFENSE</text>
-            <text x="0" y="40" font-size="20">PHYSIQUE</text>
-            <!-- silhouette simple -->
-            <path d="M40 120 q40 -60 80 0 q-20 20 -40 20 q-20 0 -40 -20" fill="#111" />
-          </g>
-        </g>
-
-        <!-- Droite -->
-        <g id="rightGroup" clip-path="url(#clipRight)">
-          <rect x="400" y="50" width="350" height="700" rx="60" ry="60" fill="url(#gRight)"/>
-          <g transform="translate(460,220)" fill="#fff">
-            <text x="0" y="-40" font-size="48" font-weight="700">FASD</text>
-            <text x="0" y="10" font-size="20">AUTO DÉFENSE</text>
-            <text x="0" y="40" font-size="20">INTELLECTUELLE</text>
-            <!-- icône tête/engrenage simple -->
-            <circle cx="80" cy="140" r="30" fill="#fff" />
-            <path d="M70 130 l10 -10 l10 10 l-10 10 z" fill="#111" />
-          </g>
-        </g>
-
-        <!-- Séparateur central (ampersand) -->
-        <g id="center" transform="translate(360,380)">
-          <text x="0" y="0" font-size="48" font-weight="700" fill="#0077cc">&amp;</text>
-        </g>
-      </svg>
+      <!-- Utilise ton fichier SVG dans assets/ -->
+      <img id="fasd-logo" src="assets/logo.svg" alt="FASD — Auto défense physique et intellectuelle" />
 
       <!-- zones cliquables superposées -->
       <a class="half left" href="physique.html" aria-label="Aller à la défense physique"></a>
