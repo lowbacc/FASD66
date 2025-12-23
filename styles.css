@@ -97,4 +97,27 @@ table thead th{background:rgba(255,255,255,0.02);font-weight:600}
 /* Focus visible pour accessibilité */
 .logo-wrap:focus { outline: 3px solid rgba(0,119,204,0.25); outline-offset:6px; }
 
-/* Si tu as déjà des règles pour .logo-wrap, garde-les ; ces règles complètent l'animation */
+/* Force l'affichage du SVG et protège contre overrides globaux */
+#fasd-logo {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Rendre tous les éléments internes visibles si un style global les masque */
+#fasd-logo * {
+  visibility: visible !important;
+  opacity: 1 !important;
+  fill-opacity: 1 !important;
+  stroke-opacity: 1 !important;
+}
+
+/* Si tu utilises l'inline SVG, assure-toi que les groupes animés restent visibles */
+#leftGroup, #rightGroup, #center { will-change: transform; }
+
+/* Si tu utilises encore la technique à deux images, désactive object-fit problématique */
+.logo-img, #fasd-logo { object-fit: contain; }
