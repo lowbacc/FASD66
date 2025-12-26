@@ -59,3 +59,114 @@ document.addEventListener('DOMContentLoaded', () => {
   handleForm('contactForm');       // intellectuelle
   handleForm('contactFormPhys');   // physique
 });
+
+/* ---------------------------------------------------------
+   MENU BURGER (MOBILE)
+--------------------------------------------------------- */
+
+const burger = document.querySelector(".nav-burger");
+const navMenu = document.querySelector(".nav-menu");
+
+if (burger) {
+  burger.addEventListener("click", () => {
+    navMenu.classList.toggle("open");
+  });
+}
+
+/* ---------------------------------------------------------
+   SOUS-MENUS SUR MOBILE (clic)
+--------------------------------------------------------- */
+
+const submenuToggles = document.querySelectorAll(".submenu-toggle");
+
+submenuToggles.forEach(toggle => {
+  toggle.addEventListener("click", (e) => {
+    // Seulement sur mobile
+    if (window.innerWidth <= 900) {
+      const parent = toggle.parentElement;
+      const submenu = parent.querySelector(".submenu");
+      submenu.classList.toggle("open");
+    }
+  });
+});
+
+/* ---------------------------------------------------------
+   FERMETURE DU MENU SI ON CLIQUE AILLEURS (mobile)
+--------------------------------------------------------- */
+
+document.addEventListener("click", (e) => {
+  if (window.innerWidth > 900) return; // seulement mobile
+
+  if (!e.target.closest(".nav-menu") && !e.target.closest(".nav-burger")) {
+    navMenu.classList.remove("open");
+
+    // fermer tous les sous-menus
+    document.querySelectorAll(".submenu.open").forEach(sm => {
+      sm.classList.remove("open");
+    });
+  }
+});
+
+/* ---------------------------------------------------------
+   PAGE CONTACT — DROPDOWN STYLÉ (Option D2)
+--------------------------------------------------------- */
+
+const dropdownBtn = document.querySelector(".dropdown-btn");
+const dropdownMenu = document.querySelector(".dropdown-menu");
+
+if (dropdownBtn && dropdownMenu) {
+  dropdownBtn.addEventListener("click", () => {
+    dropdownMenu.classList.toggle("open");
+  });
+
+  // Fermer si clic ailleurs
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".contact-dropdown")) {
+      dropdownMenu.classList.remove("open");
+    }
+  });
+}
+
+/* ---------------------------------------------------------
+   PAGE CONTACT — AFFICHAGE DES FORMULAIRES
+--------------------------------------------------------- */
+
+const formPhys = document.querySelector(".contact-form-phys");
+const formIntel = document.querySelector(".contact-form-intel");
+
+if (dropdownMenu) {
+  dropdownMenu.querySelectorAll("button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const choice = btn.dataset.choice;
+
+      dropdownBtn.textContent = btn.textContent; // mettre le texte choisi
+
+      dropdownMenu.classList.remove("open");
+
+      if (choice === "physique") {
+        formPhys.style.display = "block";
+        formIntel.style.display = "none";
+      } else if (choice === "intellectuelle") {
+        formPhys.style.display = "none";
+        formIntel.style.display = "block";
+      }
+    });
+  });
+}
+
+/* ---------------------------------------------------------
+   ANCRE AUTOMATIQUE (#physique / #intellectuelle)
+   Quand on arrive depuis le menu
+--------------------------------------------------------- */
+
+if (window.location.hash === "#physique" && formPhys) {
+  formPhys.style.display = "block";
+  formIntel.style.display = "none";
+  dropdownBtn.textContent = "Défense Physique";
+}
+
+if (window.location.hash === "#intellectuelle" && formIntel) {
+  formIntel.style.display = "block";
+  formPhys.style.display = "none";
+  dropdownBtn.textContent = "Défense Intellectuelle";
+}

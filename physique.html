@@ -7,20 +7,100 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header class="site-header">
-    <div class="header-inner">
+  
+  <header class="site-header nav-header">
+    <div class="header-inner nav-container">
+
+      <!-- Logo -->
       <a class="logo-link" href="index.html" aria-label="Accueil FASD">
-        <!-- petit logo : conserve src vers assets/logo.svg -->
         <img class="logo-small" src="assets/logo.svg" alt="FASD" />
       </a>
+
+      <!-- Burger button (mobile) -->
+      <button class="nav-burger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <!-- Navigation -->
+      <nav class="nav-menu">
+        <ul class="nav-list">
+
+          <!-- Physique -->
+          <li class="nav-item has-submenu">
+            <button class="submenu-toggle">Physique ▾</button>
+            <ul class="submenu">
+              <li><a href="physique.html">Présentation</a></li>
+              <li><a href="physique-infos.html">Infos pratiques</a></li>
+              <li><a href="physique-actu.html">Actu</a></li>
+              <li><a href="physique-presse.html">Coin presse</a></li>
+              <li><a href="contact.html#physique">Contact</a></li>
+            </ul>
+          </li>
+
+          <!-- Intellectuelle -->
+          <li class="nav-item has-submenu">
+            <button class="submenu-toggle">Intellectuelle ▾</button>
+            <ul class="submenu">
+              <li><a href="intellectuelle.html">Présentation</a></li>
+              <li><a href="intellectuelle-actu.html">Actu</a></li>
+              <li><a href="intellectuelle-presse.html">Coin presse</a></li>
+              <li><a href="ressources.html">Ressources</a></li>
+              <li><a href="projets.html">Nos projets</a></li>
+              <li><a href="soutenir.html">Nous soutenir</a></li>
+              <li><a href="contact.html#intellectuelle">Contact</a></li>
+            </ul>
+          </li>
+
+          <!-- Contact direct -->
+          <li class="nav-item">
+            <a href="contact.html">Contact</a>
+          </li>
+
+        </ul>
+      </nav>
+
     </div>
   </header>
 
-
   <main class="page-main">
     <div class="page-content">
-      <h1>Défense Physique</h1>
-      <p>Nos ateliers de défense physique combinent techniques de prévention, postures et exercices pratiques pour gagner en confiance et en sécurité.</p>
+
+      <h1>Défense Physique — FASD 66</h1>
+
+      <h2>Présentation</h2>
+      <p>
+        Créée en 2014, FASD est une association engagée dans la transmission d'une self‑défense
+        accessible, moderne et réaliste. Implantée dans les Pyrénées‑Orientales, elle propose un
+        enseignement centré sur la prévention, la maîtrise de soi et l'acquisition de réflexes
+        efficaces pour faire face aux situations d'agression ou de mise en danger.
+      </p>
+
+      <p>
+        Notre approche repose sur trois piliers :
+      </p>
+      <ul>
+        <li><strong>Simplicité</strong> : des techniques directes, intuitives, adaptées à tous les niveaux.</li>
+        <li><strong>Sécurité</strong> : un apprentissage progressif, respectueux du corps et des limites de chacun.</li>
+        <li><strong>Autonomie</strong> : développer la confiance, l'affirmation de soi et la capacité à réagir lucidement.</li>
+      </ul>
+
+      <p>
+        Les cours sont ouverts à tous, sans prérequis, et s'adressent aussi bien aux débutants
+        qu'aux pratiquants souhaitant renforcer leurs compétences. L'objectif n'est pas la
+        performance sportive, mais la protection personnelle, la gestion du stress et la
+        préparation mentale face aux situations du quotidien.
+      </p>
+
+      <p>
+        FASD 66 se distingue par une pédagogie bienveillante, ancrée dans le réel, qui met l'accent
+        sur la compréhension des comportements agressifs, la prévention des conflits et
+        l'apprentissage de gestes simples permettant de se défendre efficacement.
+      </p>
+
+      <p>
+        Rejoindre FASD 66, c'est intégrer un espace d'entraînement convivial, sérieux et inclusif,
+        où chacun progresse à son rythme dans un cadre sécurisé.
+      </p>
 
       <h2>Événements à venir</h2>
       <ul>
@@ -35,7 +115,7 @@
         <li>Exercices pratiques en binôme</li>
       </ul>
 
-      <!-- Contact / Inscription (ajouté ici) -->
+      <!-- Contact / Inscription -->
       <section class="contact-section" aria-labelledby="contactTitlePhys">
         <h2 id="contactTitlePhys">Contact · Inscription</h2>
         <p class="contact-sub">Remplis le formulaire pour recevoir des infos ou t’inscrire aux ateliers.</p>
@@ -78,6 +158,7 @@
           </div>
         </form>
       </section>
+
     </div>
   </main>
 
