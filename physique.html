@@ -7,25 +7,23 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  
+
+  <!-- HEADER -->
   <header class="site-header nav-header">
     <div class="header-inner nav-container">
 
-      <!-- Logo -->
       <a class="logo-link" href="index.html" aria-label="Accueil FASD">
         <img class="logo-small" src="assets/logo.svg" alt="FASD" />
       </a>
 
-      <!-- Burger button (mobile) -->
       <button class="nav-burger" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
 
-      <!-- Navigation -->
       <nav class="nav-menu">
         <ul class="nav-list">
 
-          <!-- Physique -->
+          <!-- MENU PHYSIQUE -->
           <li class="nav-item has-submenu">
             <button class="submenu-toggle">Physique ▾</button>
             <ul class="submenu">
@@ -33,11 +31,10 @@
               <li><a href="physique-infos.html">Infos pratiques</a></li>
               <li><a href="physique-actu.html">Actu</a></li>
               <li><a href="physique-presse.html">Coin presse</a></li>
-              <li><a href="contact.html#physique">Contact</a></li>
             </ul>
           </li>
 
-          <!-- Intellectuelle -->
+          <!-- MENU INTELLECTUELLE -->
           <li class="nav-item has-submenu">
             <button class="submenu-toggle">Intellectuelle ▾</button>
             <ul class="submenu">
@@ -47,11 +44,10 @@
               <li><a href="ressources.html">Ressources</a></li>
               <li><a href="projets.html">Nos projets</a></li>
               <li><a href="soutenir.html">Nous soutenir</a></li>
-              <li><a href="contact.html#intellectuelle">Contact</a></li>
             </ul>
           </li>
 
-          <!-- Contact direct -->
+          <!-- LIEN CONTACT PRINCIPAL -->
           <li class="nav-item">
             <a href="contact.html">Contact</a>
           </li>
@@ -62,102 +58,26 @@
     </div>
   </header>
 
+  <!-- CONTENU -->
   <main class="page-main">
     <div class="page-content">
+      <h1>Défense Physique</h1>
 
-      <h1>Défense Physique — FASD 66</h1>
+      <p><strong>Créée en 2014</strong>, FASD est une association engagée dans la transmission d'une self‑défense accessible, moderne et réaliste. Implantée dans les Pyrénées‑Orientales, elle propose un enseignement centré sur la prévention, la maîtrise de soi et l'acquisition de réflexes efficaces pour faire face aux situations d'agression ou de mise en danger.</p>
 
-      <h2>Présentation</h2>
-      <p>
-        Créée en 2014, FASD est une association engagée dans la transmission d'une self‑défense
-        accessible, moderne et réaliste. Implantée dans les Pyrénées‑Orientales, elle propose un
-        enseignement centré sur la prévention, la maîtrise de soi et l'acquisition de réflexes
-        efficaces pour faire face aux situations d'agression ou de mise en danger.
-      </p>
+      <p>Notre approche repose sur trois piliers :</p>
 
-      <p>
-        Notre approche repose sur trois piliers :
-      </p>
       <ul>
         <li><strong>Simplicité</strong> : des techniques directes, intuitives, adaptées à tous les niveaux.</li>
         <li><strong>Sécurité</strong> : un apprentissage progressif, respectueux du corps et des limites de chacun.</li>
         <li><strong>Autonomie</strong> : développer la confiance, l'affirmation de soi et la capacité à réagir lucidement.</li>
       </ul>
 
-      <p>
-        Les cours sont ouverts à tous, sans prérequis, et s'adressent aussi bien aux débutants
-        qu'aux pratiquants souhaitant renforcer leurs compétences. L'objectif n'est pas la
-        performance sportive, mais la protection personnelle, la gestion du stress et la
-        préparation mentale face aux situations du quotidien.
-      </p>
+      <p>Les cours sont ouverts à tous, sans prérequis, et s'adressent aussi bien aux débutants qu'aux pratiquants souhaitant renforcer leurs compétences. L'objectif n'est pas la performance sportive, mais la protection personnelle, la gestion du stress et la préparation mentale face aux situations du quotidien.</p>
 
-      <p>
-        FASD 66 se distingue par une pédagogie bienveillante, ancrée dans le réel, qui met l'accent
-        sur la compréhension des comportements agressifs, la prévention des conflits et
-        l'apprentissage de gestes simples permettant de se défendre efficacement.
-      </p>
+      <p>FASD 66 se distingue par une pédagogie bienveillante, ancrée dans le réel, qui met l'accent sur la compréhension des comportements agressifs, la prévention des conflits et l'apprentissage de gestes simples permettant de se défendre efficacement.</p>
 
-      <p>
-        Rejoindre FASD 66, c'est intégrer un espace d'entraînement convivial, sérieux et inclusif,
-        où chacun progresse à son rythme dans un cadre sécurisé.
-      </p>
-
-      <h2>Événements à venir</h2>
-      <ul>
-        <li><strong>12 mars</strong> — Conférence "Distinguer info et rumeur" (session d'introduction)</li>
-        <li><strong>26 avril</strong> — Atelier pratique : mise en situation et techniques de base</li>
-      </ul>
-
-      <h2>Programme</h2>
-      <ul>
-        <li>Prévention et awareness</li>
-        <li>Techniques de désengagement</li>
-        <li>Exercices pratiques en binôme</li>
-      </ul>
-
-      <!-- Contact / Inscription -->
-      <section class="contact-section" aria-labelledby="contactTitlePhys">
-        <h2 id="contactTitlePhys">Contact · Inscription</h2>
-        <p class="contact-sub">Remplis le formulaire pour recevoir des infos ou t’inscrire aux ateliers.</p>
-
-        <form id="contactFormPhys" class="contact-form" novalidate>
-          <div class="row">
-            <label for="fullname-phys">Nom complet</label>
-            <input id="fullname-phys" name="fullname" type="text" required autocomplete="name" />
-          </div>
-
-          <div class="row">
-            <label for="email-phys">Email</label>
-            <input id="email-phys" name="email" type="email" required autocomplete="email" />
-          </div>
-
-          <div class="row">
-            <label for="interest-phys">Intérêt</label>
-            <select id="interest-phys" name="interest">
-              <option>Défense Physique</option>
-              <option>Défense Intellectuelle</option>
-              <option>Les deux</option>
-            </select>
-          </div>
-
-          <div class="row">
-            <label for="message-phys">Message</label>
-            <textarea id="message-phys" name="message" rows="4" placeholder="Dis-nous ce qui t'intéresse"></textarea>
-          </div>
-
-          <div class="row row-inline">
-            <label class="checkbox">
-              <input id="consent-phys" name="consent" type="checkbox" required />
-              <span>J’accepte que mes données soient utilisées pour répondre</span>
-            </label>
-          </div>
-
-          <div class="row actions">
-            <button type="submit" class="btn primary">Envoyer</button>
-            <span class="form-note" aria-live="polite"></span>
-          </div>
-        </form>
-      </section>
+      <p>Rejoindre FASD 66, c'est intégrer un espace d'entraînement convivial, sérieux et inclusif, où chacun progresse à son rythme dans un cadre sécurisé.</p>
 
     </div>
   </main>

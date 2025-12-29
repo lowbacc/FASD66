@@ -361,3 +361,100 @@ h2 { color: var(--text); margin-bottom: 8px; }
 }
 .half.left { left: 0; }
 .half.right { right: 0; }
+
+/* Centrage parfait du logo sur la page d'accueil */
+.homepage .hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 0;
+}
+
+/* Logo géant */
+.logo-wrap {
+  width: min(100vmin, 1400px);
+  height: min(100vmin, 1400px);
+  position: relative;
+}
+
+/* Zones cliquables */
+.half {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  cursor: pointer;
+  z-index: 60;
+}
+.half.left { left: 0; }
+.half.right { right: 0; }
+
+/* --- FORMULAIRES --- */
+form {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: #1e1e1e;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+form h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  color: #f0f0f0;
+}
+
+.form-block {
+  margin-bottom: 1.2rem;
+}
+
+.form-block label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 500;
+  color: #ccc;
+}
+
+.form-block input,
+.form-block textarea {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #2a2a2a;
+  color: #eee;
+  font-size: 1rem;
+}
+
+.form-block input:focus,
+.form-block textarea:focus {
+  outline: none;
+  border-color: #66c2ff;
+  background: #1f1f1f;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #ccc;
+  margin-bottom: 1.5rem;
+}
+
+.btn.primary {
+  background: #66c2ff;
+  color: #fff;
+  padding: 0.8rem 1.4rem;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.btn.primary:hover {
+  background: #4aaae0;
+}

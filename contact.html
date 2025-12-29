@@ -8,7 +8,7 @@
 </head>
 <body>
 
-  <!-- HEADER COMPLET -->
+  <!-- HEADER -->
   <header class="site-header nav-header">
     <div class="header-inner nav-container">
 
@@ -23,6 +23,7 @@
       <nav class="nav-menu">
         <ul class="nav-list">
 
+          <!-- MENU PHYSIQUE -->
           <li class="nav-item has-submenu">
             <button class="submenu-toggle">Physique ▾</button>
             <ul class="submenu">
@@ -30,10 +31,10 @@
               <li><a href="physique-infos.html">Infos pratiques</a></li>
               <li><a href="physique-actu.html">Actu</a></li>
               <li><a href="physique-presse.html">Coin presse</a></li>
-              <li><a href="contact.html#physique">Contact</a></li>
             </ul>
           </li>
 
+          <!-- MENU INTELLECTUELLE -->
           <li class="nav-item has-submenu">
             <button class="submenu-toggle">Intellectuelle ▾</button>
             <ul class="submenu">
@@ -43,10 +44,10 @@
               <li><a href="ressources.html">Ressources</a></li>
               <li><a href="projets.html">Nos projets</a></li>
               <li><a href="soutenir.html">Nous soutenir</a></li>
-              <li><a href="contact.html#intellectuelle">Contact</a></li>
             </ul>
           </li>
 
+          <!-- LIEN CONTACT PRINCIPAL -->
           <li class="nav-item">
             <a href="contact.html">Contact</a>
           </li>
@@ -62,78 +63,70 @@
     <div class="page-content">
 
       <h1>Contact</h1>
+
       <p>Choisissez la branche que vous souhaitez contacter :</p>
 
-      <!-- DROPDOWN STYLÉ -->
+      <!-- DROPDOWN -->
       <div class="contact-dropdown">
-        <button class="dropdown-btn">Choisir la branche ▼</button>
-
-        <div class="dropdown-menu">
-          <button data-choice="physique">Défense Physique</button>
-          <button data-choice="intellectuelle">Défense Intellectuelle</button>
+        <button class="dropdown-btn" id="branchSelect">Choisir la branche ▼</button>
+        <div class="dropdown-menu" id="branchMenu">
+          <button data-branch="physique">Défense Physique</button>
+          <button data-branch="intellectuelle">Défense Intellectuelle</button>
         </div>
       </div>
 
       <!-- FORMULAIRE PHYSIQUE -->
-      <form class="contact-form contact-form-phys" id="formPhysique" novalidate>
+      <form class="contact-form-phys" id="formPhysique">
         <h2>Contact — Défense Physique</h2>
 
-        <div class="row">
-          <label for="fullname-phys">Nom complet</label>
-          <input id="fullname-phys" name="fullname" type="text" required />
+        <div class="form-block">
+          <label for="namePhys">Nom complet</label>
+          <input type="text" id="namePhys" required />
         </div>
 
-        <div class="row">
-          <label for="email-phys">Email</label>
-          <input id="email-phys" name="email" type="email" required />
+        <div class="form-block">
+          <label for="emailPhys">Email</label>
+          <input type="email" id="emailPhys" required />
         </div>
 
-        <div class="row">
-          <label for="message-phys">Message</label>
-          <textarea id="message-phys" name="message" rows="4"></textarea>
+        <div class="form-block">
+          <label for="messagePhys">Message</label>
+          <textarea id="messagePhys" rows="5" required></textarea>
         </div>
 
-        <div class="row row-inline">
-          <label class="checkbox">
-            <input id="consent-phys" name="consent" type="checkbox" required />
-            <span>J’accepte que mes données soient utilisées pour répondre</span>
-          </label>
-        </div>
+        <label class="checkbox">
+          <input type="checkbox" required />
+          J’accepte que mes données soient utilisées pour répondre
+        </label>
 
-        <div class="row actions">
-          <button type="submit" class="btn primary">Envoyer</button>
-        </div>
+        <button type="submit" class="btn primary">Envoyer</button>
       </form>
 
       <!-- FORMULAIRE INTELLECTUELLE -->
-      <form class="contact-form contact-form-intel" id="formIntellectuelle" novalidate>
+      <form class="contact-form-intel" id="formIntellectuelle">
         <h2>Contact — Défense Intellectuelle</h2>
 
-        <div class="row">
-          <label for="fullname-intel">Nom complet</label>
-          <input id="fullname-intel" name="fullname" type="text" required />
+        <div class="form-block">
+          <label for="nameIntel">Nom complet</label>
+          <input type="text" id="nameIntel" required />
         </div>
 
-        <div class="row">
-          <label for="email-intel">Email</label>
-          <input id="email-intel" name="email" type="email" required />
+        <div class="form-block">
+          <label for="emailIntel">Email</label>
+          <input type="email" id="emailIntel" required />
         </div>
 
-        <div class="row">
-          <label for="message-intel">Message</label>
-          <textarea id="message-intel" name="message" rows="4"></textarea>
+        <div class="form-block">
+          <label for="messageIntel">Message</label>
+          <textarea id="messageIntel" rows="5" required></textarea>
         </div>
 
-        <div class="row row-inline">
-          <label class="checkbox">
-            <input id="consent-intel" name="consent" type="checkbox" required />
-            <span>J’accepte que mes données soient utilisées pour répondre</span>
-          </label>
-        </div>
+        <label class="checkbox">
+          <input type="checkbox" required />
+          J’accepte que mes données soient utilisées pour répondre
+        </label>
 
-        <div class="row actions">
-          <button type="submit" class="btn primary">Envoyer</button>
-        </div>
+        <button type="submit" class="btn primary">Envoyer</button>
       </form>
 
     </div>

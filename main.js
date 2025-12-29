@@ -137,7 +137,7 @@ const formIntel = document.querySelector(".contact-form-intel");
 if (dropdownMenu) {
   dropdownMenu.querySelectorAll("button").forEach(btn => {
     btn.addEventListener("click", () => {
-      const choice = btn.dataset.choice;
+      const choice = btn.dataset.branch;
 
       dropdownBtn.textContent = btn.textContent; // mettre le texte choisi
 
