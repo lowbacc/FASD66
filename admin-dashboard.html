@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FASD — Admin Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="manifest" href="manifest.json">
+
+
+  <style>
+    /* ----------------------------------------------------
+       OPTIMISATION MOBILE (sans casser ton design)
+    ---------------------------------------------------- */
+
+    .admin-section {
+      background: #1a1a1a;
+      padding: 1.2rem;
+      border-radius: 8px;
+      margin: 1.5rem 0;
+      border: 1px solid #333;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      padding: 0.3rem 0;
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .toggle-icon {
+      font-size: 1.4rem;
+      opacity: 0.7;
+      transition: transform 0.2s ease;
+    }
+
+    .open .toggle-icon {
+      transform: rotate(90deg);
+    }
+
+    .section-content {
+      display: none;
+      margin-top: 1rem;
+      animation: fadeIn 0.25s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* FORMULAIRES */
+    .form-block {
+      margin-bottom: 1rem;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 0.6rem;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #111;
+      color: white;
+      font-size: 1rem;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    /* CARTES */
+    .admin-card {
+      background: #222;
+      padding: 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+      border: 1px solid #333;
+    }
+
+    /* BOUTONS */
+    .btn {
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      background: #444;
+      color: white;
+      font-size: 1rem;
+    }
+
+    .btn.primary {
+      background: #0055ff;
+    }
+
+    .btn:hover {
+      opacity: 0.85;
+    }
+
+    /* MOBILE */
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.6rem;
+      }
+
+      .admin-section {
+        padding: 1rem;
+      }
+
+      .section-header h2 {
+        font-size: 1.1rem;
+      }
+
+      .btn {
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="page-main">
+    <div class="page-content" style="max-width:900px;margin:auto;">
+
+      <h1>Espace Administrateur</h1>
+      <p>Gérez facilement les contenus de l’association.</p>
+
+      <button id="logoutBtn" class="btn primary" style="margin-bottom:2rem;">Déconnexion</button>
+
+      <!-- ----------------------------- -->
+      <!-- POSTS -->
+      <!-- ----------------------------- -->
+      <section id="posts" class="admin-section">
+        <div class="section-header">
+          <h2>Créer un post</h2>
+          <span class="toggle-icon">▶</span>
+        </div>
+
+        <div class="section-content">
+          <form id="postForm">
+
+            <div class="form-block">
+              <label for="postTitle">Titre du post</label>
+              <input type="text" id="postTitle" required />
+            </div>
+
+            <div class="form-block">
+              <label for="postContent">Contenu</label>
+              <textarea id="postContent" rows="6" required></textarea>
+            </div>
+
+            <div class="form-block">
+              <label for="postLocation">Où publier ?</label>
+              <select id="postLocation" required>
+                <option value="">-- Choisir --</option>
+                <option value="physique-actu">Actualités Défense Physique</option>
+                <option value="intellectuelle-actu">Actualités Défense Intellectuelle</option>
+                <option value="physique-presse">Presse Défense Physique</option>
+                <option value="intellectuelle-presse">Presse Défense Intellectuelle</option>
+                <option value="accueil">Page d’accueil</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn primary">Publier</button>
+          </form>
+
+          <h3 style="margin-top:2rem;">Posts existants</h3>
+          <div id="postsList"></div>
+        </div>
+      </section>
+
+      <!-- ----------------------------- -->
+      <!-- PROJETS -->
+      <!-- ----------------------------- -->
+      <section id="projects" class="admin-section">
+        <div class="section-header">
+          <h2>Créer un projet</h2>
+          <span class="toggle-icon">▶</span>
+        </div>
+
+        <div class="section-content">
+          <form id="projectForm">
+
+            <div class="form-block">
+              <label for="projectTitle">Titre</label>
+              <input type="text" id="projectTitle" required />
+            </div>
+
+            <div class="form-block">
+              <label for="projectStatus">Statut</label>
+              <select id="projectStatus" required>
+                <option value="En cours">En cours</option>
+                <option value="Terminé">Terminé</option>
+                <option value="À venir">À venir</option>
+              </select>
+            </div>
+
+            <div class="form-block">
+              <label for="projectStart">Date de début</label>
+              <input type="month" id="projectStart" required />
+            </div>
+
+            <div class="form-block">
+              <label for="projectEnd">Date de fin</label>
+              <input type="month" id="projectEnd" />
+            </div>
+
+            <div class="form-block">
+              <label for="projectImage">Image (URL)</label>
+              <input type="url" id="projectImage" />
+            </div>
+
+            <div class="form-block">
+              <label for="projectLink">Lien externe</label>
+              <input type="url" id="projectLink" />
+            </div>
+
+            <div class="form-block">
+              <label for="projectDescription">Description</label>
+              <textarea id="projectDescription" rows="5" required></textarea>
+            </div>
+
+            <button type="submit" class="btn primary">Enregistrer</button>
+          </form>
+
+          <h3 style="margin-top:2rem;">Projets existants</h3>
+          <div id="projectsList"></div>
+        </div>
+      </section>
+
+      <!-- ----------------------------- -->
+      <!-- RESSOURCES -->
+      <!-- ----------------------------- -->
+      <section id="resources" class="admin-section">
+        <div class="section-header">
+          <h2>Ajouter une ressource</h2>
+          <span class="toggle-icon">▶</span>
+        </div>
+
+        <div class="section-content">
+          <form id="resourceForm">
+
+            <div class="form-block">
+              <label for="resourceTitle">Titre</label>
+              <input type="text" id="resourceTitle" required />
+            </div>
+
+            <div class="form-block">
+              <label for="resourceType">Type</label>
+              <select id="resourceType" required>
+                <option value="PDF">PDF</option>
+                <option value="Vidéo">Vidéo</option>
+                <option value="Article">Article</option>
+                <option value="Outil">Outil</option>
+                <option value="Autre">Autre</option>
+              </select>
+            </div>
+
+            <div class="form-block">
+              <label for="resourceCategory">Catégorie</label>
+              <input type="text" id="resourceCategory" />
+            </div>
+
+            <div class="form-block">
+              <label for="resourceLink">Lien</label>
+              <input type="url" id="resourceLink" required />
+            </div>
+
+            <div class="form-block">
+              <label for="resourceDescription">Description</label>
+              <textarea id="resourceDescription" rows="4" required></textarea>
+            </div>
+
+            <button type="submit" class="btn primary">Enregistrer</button>
+          </form>
+
+          <h3 style="margin-top:2rem;">Ressources existantes</h3>
+          <div id="resourcesList"></div>
+        </div>
+      </section>
+
+      <!-- ----------------------------- -->
+      <!-- SIGNALEMENTS -->
+      <!-- ----------------------------- -->
+      <section id="reports" class="admin-section">
+        <div class="section-header">
+          <h2>Signalements d’erreurs</h2>
+          <span class="toggle-icon">▶</span>
+        </div>
+
+        <div class="section-content">
+          <div id="reportsList"></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    /* -----------------------------
+       AUTH
+    ------------------------------*/
+    if (localStorage.getItem("adminLoggedIn") !== "true") {
+      window.location.href = "admin-login.html";
+    }
+
+    logoutBtn.onclick = () => {
+      localStorage.removeItem("adminLoggedIn");
+      window.location.href = "admin-login.html";
+    };
+
+    /* -----------------------------
+       SECTIONS REPLIABLES
+    ------------------------------*/
+    document.querySelectorAll(".admin-section").forEach(section => {
+      const header = section.querySelector(".section-header");
+      const content = section.querySelector(".section-content");
+
+      header.onclick = () => {
+        const isOpen = section.classList.toggle("open");
+        content.style.display = isOpen ? "block" : "none";
+      };
+    });
+
+    /* -----------------------------
+       POSTS
+    ------------------------------*/
+    function loadPosts() {
+      const posts = JSON.parse(localStorage.getItem("posts") || "[]");
+      postsList.innerHTML = "";
+
+      posts.forEach((post, index) => {
+        const div = document.createElement("div");
+        div.className = "admin-card";
+
+        div.innerHTML = `
+          <h3>${post.title}</h3>
+          <p><strong>Emplacement :</strong> ${post.location}</p>
+          <p>${post.content}</p>
+          <button class="btn delete-post" data-index="${index}">Supprimer</button>
+        `;
+
+        postsList.appendChild(div);
+      });
+
+      document.querySelectorAll(".delete-post").forEach(btn => {
+        btn.onclick = () => {
+          const posts = JSON.parse(localStorage.getItem("posts") || "[]");
+          posts.splice(btn.dataset.index, 1);
+          localStorage.setItem("posts", JSON.stringify(posts));
+          loadPosts();
+        };
+      });
+    }
+
+    postForm.onsubmit = e => {
+      e.preventDefault();
+      const posts = JSON.parse(localStorage.getItem("posts") || "[]");
+
+      posts.push({
+        title: postTitle.value,
+        content: postContent.value,
+        location: postLocation.value,
+        date: new Date().toISOString()
+      });
+
+      localStorage.setItem("posts", JSON.stringify(posts));
+      postForm.reset();
+      loadPosts();
+    };
+
+    /* -----------------------------
+       PROJETS
+    ------------------------------*/
+    function loadProjects() {
+      const projects = JSON.parse(localStorage.getItem("projects") || "[]");
+      projectsList.innerHTML = "";
+
+      projects.forEach((p, index) => {
+        const div = document.createElement("div");
+        div.className = "admin-card";
+
+        div.innerHTML = `
+          <h3>${p.title}</h3>
+          <p><strong>Statut :</strong> ${p.status}</p>
+          <p><strong>Dates :</strong> ${p.start} → ${p.end || "En cours"}</p>
+          ${p.link ? `<p><a href="${p.link}" target="_blank">Lien externe</a></p>` : ""}
+          <p>${p.description}</p>
+          <button class="btn delete-project" data-index="${index}">Supprimer</button>
+        `;
+
+        projectsList.appendChild(div);
+      });
+
+      document.querySelectorAll(".delete-project").forEach(btn => {
+        btn.onclick = () => {
+          const projects = JSON.parse(localStorage.getItem("projects") || "[]");
+          projects.splice(btn.dataset.index, 1);
+          localStorage.setItem("projects", JSON.stringify(projects));
+          loadProjects();
+        };
+      });
+    }
+
+    projectForm.onsubmit = e => {
+      e.preventDefault();
+      const projects = JSON.parse(localStorage.getItem("projects") || "[]");
+
+      projects.push({
+        title: projectTitle.value,
+        status: projectStatus.value,
+        start: projectStart.value,
+        end: projectEnd.value,
+        image: projectImage.value,
+        link: projectLink.value,
+        description: projectDescription.value
+      });
+
+      localStorage.setItem("projects", JSON.stringify(projects));
+      projectForm.reset();
+      loadProjects();
+    };
+
+    /* -----------------------------
+       RESSOURCES
+    ------------------------------*/
+    function loadResources() {
+      const resources = JSON.parse(localStorage.getItem("resources") || "[]");
+      resourcesList.innerHTML = "";
+
+      resources.forEach((r, index) => {
+        const div = document.createElement("div");
+        div.className = "admin-card";
+
+        div.innerHTML = `
+          <h3>${r.title}</h3>
+          <p><strong>Type :</strong> ${r.type}</p>
+          ${r.category ? `<p><strong>Catégorie :</strong> ${r.category}</p>` : ""}
+          <p>${r.description}</p>
+          <p><a href="${r.link}" target="_blank">Ouvrir</a></p>
+          <button class="btn delete-resource" data-index="${index}">Supprimer</button>
+        `;
+
+        resourcesList.appendChild(div);
+      });
+
+      document.querySelectorAll(".delete-resource").forEach(btn => {
+        btn.onclick = () => {
+          const resources = JSON.parse(localStorage.getItem("resources") || "[]");
+          resources.splice(btn.dataset.index, 1);
+          localStorage.setItem("resources", JSON.stringify(resources));
+          loadResources();
+        };
+      });
+    }
+
+    resourceForm.onsubmit = e => {
+      e.preventDefault();
+      const resources = JSON.parse(localStorage.getItem("resources") || "[]");
+
+      resources.push({
+        title: resourceTitle.value,
+        type: resourceType.value,
+        category: resourceCategory.value,
+        link: resourceLink.value,
+        description: resourceDescription.value
+      });
+
+      localStorage.setItem("resources", JSON.stringify(resources));
+      resourceForm.reset();
+      loadResources();
+    };
+
+    /* -----------------------------
+       SIGNALEMENTS
+    ------------------------------*/
+    function loadReports() {
+      const reports = JSON.parse(localStorage.getItem("reports") || "[]");
+      reportsList.innerHTML = "";
+
+      reports.forEach((rep, index) => {
+        const div = document.createElement("div");
+        div.className = "admin-card";
+
+        const date = new Date(rep.date).toLocaleDateString("fr-FR");
+
+        div.innerHTML = `
+          <h3>${rep.postTitle}</h3>
+          <p>${rep.message}</p>
+          <p style="opacity:0.7;">${date}</p>
+          <button class="btn delete-report" data-index="${index}">Supprimer</button>
+        `;
+
+        reportsList.appendChild(div);
+      });
+
+      document.querySelectorAll(".delete-report").forEach(btn => {
+        btn.onclick = () => {
+          const reports = JSON.parse(localStorage.getItem("reports") || "[]");
+          reports.splice(btn.dataset.index, 1);
+          localStorage.setItem("reports", JSON.stringify(reports));
+          loadReports();
+        };
+      });
+    }
+
+    /* -----------------------------
+       INIT
+    ------------------------------*/
+    loadPosts();
+    loadProjects();
+    loadResources();
+    loadReports();
+  </script>
+
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
+
+</body>
+</html>

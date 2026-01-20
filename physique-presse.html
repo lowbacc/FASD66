@@ -68,31 +68,7 @@
 
       <h2>Articles & Publications</h2>
 
-      <!-- ARTICLE 1 -->
-      <article class="press-item">
-        <h3>(Titre de l’article)</h3>
-        <p>(Résumé de l’article — à compléter)</p>
-        <p class="press-source">(Nom du média — Date)</p>
-        <p><a href="#" target="_blank">Lire l’article complet</a></p>
-      </article>
-
-      <!-- ARTICLE 2 -->
-      <article class="press-item">
-        <h3>(Titre de l’article)</h3>
-        <p>(Résumé de l’article — à compléter)</p>
-        <p class="press-source">(Nom du média — Date)</p>
-        <p><a href="#" target="_blank">Lire l’article complet</a></p>
-      </article>
-
-      <!-- ARTICLE 3 -->
-      <article class="press-item">
-        <h3>(Titre de l’article)</h3>
-        <p>(Résumé de l’article — à compléter)</p>
-        <p class="press-source">(Nom du média — Date)</p>
-        <p><a href="#" target="_blank">Lire l’article complet</a></p>
-      </article>
-
-      <p>Tu peux ajouter autant d’articles que tu veux en copiant/collant un bloc `<article>`.</p>
+      <!-- Les articles presse seront injectés ici automatiquement -->
 
     </div>
   </main>
@@ -102,5 +78,102 @@
   </footer>
 
   <script src="main.js"></script>
+
+  <script>
+    // Charger les posts depuis le localStorage
+    const posts = JSON.parse(localStorage.getItem("posts") || "[]");
+
+    // Filtrer uniquement ceux destinés au coin presse Défense Physique
+    const filteredPosts = posts
+      .filter(p => p.location === "physique-presse")
+      .sort((a, b) => new Date(b.date) - new Date(a.date)); // plus récent en premier
+
+    const container = document.createElement("div");
+    container.style.marginTop = "2rem";
+
+    if (filteredPosts.length === 0) {
+      container.innerHTML = "<p>Aucun article de presse pour le moment.</p>";
+    } else {
+      filteredPosts.forEach(post => {
+        const div = document.createElement("div");
+        div.style.padding = "1rem";
+        div.style.margin = "1rem 0";
+        div.style.background = "#1e1e1e";
+        div.style.borderRadius = "6px";
+
+        const date = new Date(post.date).toLocaleDateString("fr-FR");
+
+        div.innerHTML = `
+          <h3>${post.title}</h3>
+          <p style="opacity:0.7;font-size:0.9rem;">Publié le ${date}</p>
+          <p style="margin-top:0.5rem;">${post.content}</p>
+
+          <div style="margin-top:1rem; display:flex; gap:1rem;">
+            <button class="btn share-btn" data-title="${post.title}" data-content="${post.content}">
+              Partager
+            </button>
+
+            <button class="btn error-btn" data-title="${post.title}">
+              Signaler une erreur
+            </button>
+          </div>
+        `;
+
+        container.appendChild(div);
+      });
+    }
+
+    document.querySelector(".page-content").appendChild(container);
+
+    /* -----------------------------
+       PARTAGER UN POST
+    ------------------------------*/
+    document.addEventListener("click", (e) => {
+      if (e.target.classList.contains("share-btn")) {
+        const title = e.target.dataset.title;
+        const content = e.target.dataset.content;
+        const url = window.location.href;
+
+        if (navigator.share) {
+          navigator.share({
+            title,
+            text: content,
+            url
+          });
+        } else {
+          navigator.clipboard.writeText(url);
+          alert("Lien copié dans le presse-papier !");
+        }
+      }
+    });
+
+    /* -----------------------------
+       SIGNALER UNE ERREUR
+    ------------------------------*/
+    document.addEventListener("click", (e) => {
+      if (e.target.classList.contains("error-btn")) {
+        const title = e.target.dataset.title;
+
+        const message = prompt(
+          "Décrivez l’erreur que vous avez trouvée dans le post :\n\n" + title
+        );
+
+        if (!message) return;
+
+        const reports = JSON.parse(localStorage.getItem("reports") || "[]");
+
+        reports.push({
+          postTitle: title,
+          message,
+          date: new Date().toISOString()
+        });
+
+        localStorage.setItem("reports", JSON.stringify(reports));
+
+        alert("Merci ! Votre signalement a été enregistré.");
+      }
+    });
+  </script>
+
 </body>
 </html>

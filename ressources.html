@@ -66,55 +66,18 @@
 
       <p>Vous trouverez ici une sélection de ressources pour développer l’esprit critique, comprendre les mécanismes de la désinformation, et approfondir les notions abordées dans nos ateliers.</p>
 
-      <h2>Articles & Guides</h2>
+      <!-- FILTRES -->
+      <div id="filters" style="margin:2rem 0; display:flex; gap:1rem; flex-wrap:wrap;">
+        <button class="filter-btn" data-type="Tous">Tous</button>
+        <button class="filter-btn" data-type="PDF">PDF</button>
+        <button class="filter-btn" data-type="Vidéo">Vidéo</button>
+        <button class="filter-btn" data-type="Article">Article</button>
+        <button class="filter-btn" data-type="Outil">Outil</button>
+        <button class="filter-btn" data-type="Autre">Autre</button>
+      </div>
 
-      <ul class="resource-list">
-        <li>
-          <strong>(Titre de la ressource)</strong><br>
-          <span>(Description — à compléter)</span><br>
-          <a href="#" target="_blank">Consulter</a>
-        </li>
-
-        <li>
-          <strong>(Titre de la ressource)</strong><br>
-          <span>(Description — à compléter)</span><br>
-          <a href="#" target="_blank">Consulter</a>
-        </li>
-      </ul>
-
-      <h2>Vidéos & Conférences</h2>
-
-      <ul class="resource-list">
-        <li>
-          <strong>(Titre de la vidéo)</strong><br>
-          <span>(Description — à compléter)</span><br>
-          <a href="#" target="_blank">Voir la vidéo</a>
-        </li>
-
-        <li>
-          <strong>(Titre de la vidéo)</strong><br>
-          <span>(Description — à compléter)</span><br>
-          <a href="#" target="_blank">Voir la vidéo</a>
-        </li>
-      </ul>
-
-      <h2>Outils & Références</h2>
-
-      <ul class="resource-list">
-        <li>
-          <strong>(Nom de l’outil)</strong><br>
-          <span>(Description — à compléter)</span><br>
-          <a href="#" target="_blank">Accéder</a>
-        </li>
-
-        <li>
-          <strong>(Nom de l’outil)</strong><br>
-          <span>(Description — à compléter)</span><br>
-          <a href="#" target="_blank">Accéder</a>
-        </li>
-      </ul>
-
-      <p>Tu peux ajouter autant de ressources que tu veux en dupliquant un bloc <code>&lt;li&gt;</code>.</p>
+      <!-- CONTENEUR DES RESSOURCES -->
+      <div id="resourcesContainer"></div>
 
     </div>
   </main>
@@ -124,5 +87,67 @@
   </footer>
 
   <script src="main.js"></script>
+
+  <script>
+    // Charger les ressources depuis le localStorage
+    const resources = JSON.parse(localStorage.getItem("resources") || "[]");
+
+    const container = document.getElementById("resourcesContainer");
+
+    function displayResources(filter = "Tous") {
+      container.innerHTML = "";
+
+      const filtered = filter === "Tous"
+        ? resources
+        : resources.filter(r => r.type === filter);
+
+      if (filtered.length === 0) {
+        container.innerHTML = "<p>Aucune ressource trouvée.</p>";
+        return;
+      }
+
+      filtered.forEach(r => {
+        const div = document.createElement("div");
+        div.style.padding = "1.5rem";
+        div.style.margin = "1.5rem 0";
+        div.style.background = "#1e1e1e";
+        div.style.borderRadius = "8px";
+
+        div.innerHTML = `
+          <h3>${r.title}</h3>
+
+          <p style="opacity:0.8;margin:0.3rem 0;">
+            <strong>Type :</strong> ${r.type}
+          </p>
+
+          ${r.category ? `
+            <p style="opacity:0.8;margin:0.3rem 0;">
+              <strong>Catégorie :</strong> ${r.category}
+            </p>
+          ` : ""}
+
+          <p style="margin-top:0.8rem;">${r.description}</p>
+
+          <p style="margin-top:1rem;">
+            <a href="${r.link}" target="_blank" class="btn">Ouvrir</a>
+          </p>
+        `;
+
+        container.appendChild(div);
+      });
+    }
+
+    // Affichage initial
+    displayResources();
+
+    // Gestion des filtres
+    document.querySelectorAll(".filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const type = btn.dataset.type;
+        displayResources(type);
+      });
+    });
+  </script>
+
 </body>
 </html>

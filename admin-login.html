@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FASD — Connexion Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <main class="page-main">
+    <div class="page-content" style="max-width:400px;margin:auto;text-align:center;">
+
+      <h1>Connexion Admin</h1>
+      <p>Accès réservé à l’administration de FASD Zet’66</p>
+
+      <form id="adminLoginForm" style="margin-top:2rem;">
+        
+        <div class="form-block">
+          <label for="adminEmail">Email</label>
+          <input type="email" id="adminEmail" required />
+        </div>
+
+        <div class="form-block">
+          <label for="adminPassword">Mot de passe</label>
+          <input type="password" id="adminPassword" required />
+        </div>
+
+        <p id="loginError" style="color:#ff9b9b;display:none;">Identifiants incorrects</p>
+
+        <button type="submit" class="btn primary" style="margin-top:1rem;">Se connecter</button>
+      </form>
+
+    </div>
+  </main>
+
+  <script>
+    // Identifiants admin (à personnaliser)
+    const ADMIN_EMAIL = "admin@fasd.fr";
+    const ADMIN_PASSWORD = "admin123"; // tu pourras changer ça
+
+    const form = document.getElementById("adminLoginForm");
+    const error = document.getElementById("loginError");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("adminEmail").value;
+      const password = document.getElementById("adminPassword").value;
+
+      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+        // On stocke une "session" dans le navigateur
+        localStorage.setItem("adminLoggedIn", "true");
+
+        // Redirection vers le tableau de bord
+        window.location.href = "admin-dashboard.html";
+      } else {
+        error.style.display = "block";
+      }
+    });
+  </script>
+
+</body>
+</html>
