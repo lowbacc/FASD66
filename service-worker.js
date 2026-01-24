@@ -1,23 +1,13 @@
 // Nom du cache (change la version pour forcer la mise à jour)
-const CACHE_VERSION = "v4-fasd";
+const CACHE_VERSION = "v5-fasd";
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
-const DYNAMIC_CACHE = `dynamic-${CACHE_VERSION}`;
 
 // Fichiers statiques à mettre en cache
 const STATIC_ASSETS = [
-  "/",
-  "/index.html",
   "/styles.css",
   "/main.js",
   "/manifest.json",
-  "/assets/logo.svg",
-  "/physique-actu.html",
-  "/physique-presse.html",
-  "/intellectuelle-actu.html",
-  "/intellectuelle-presse.html",
-  "/projets.html",
-  "/ressources.html"
-  // ⚠️ admin-dashboard.html volontairement retiré du cache
+  "/assets/logo.svg"
 ];
 
 // INSTALLATION — Pré-cache des assets statiques
@@ -34,7 +24,7 @@ self.addEventListener("activate", event => {
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(key => key !== STATIC_CACHE && key !== DYNAMIC_CACHE)
+          .filter(key => key !== STATIC_CACHE)
           .map(key => caches.delete(key))
       )
     )
@@ -42,50 +32,35 @@ self.addEventListener("activate", event => {
   self.clients.claim();
 });
 
-// FETCH — Stratégies avancées
+// FETCH — Stratégie :
+// ❌ jamais de cache pour HTML
+// ❌ jamais de cache pour Supabase
+// ✔ cache-first pour CSS/JS/images
 self.addEventListener("fetch", event => {
   const request = event.request;
 
-  // 1) Ne jamais mettre en cache les requêtes Supabase
+  // Ne jamais mettre en cache Supabase
   if (request.url.includes("supabase.co")) {
     event.respondWith(fetch(request));
     return;
   }
 
-  // 2) HTML → Network First, mais on NE CACHE PAS l’admin
+  // Ne jamais mettre en cache les pages HTML
   if (request.headers.get("accept")?.includes("text/html")) {
-    const isAdmin = request.url.includes("admin-dashboard.html");
-
-    event.respondWith(
-      fetch(request)
-        .then(response => {
-          if (!isAdmin) {
-            const clone = response.clone();
-            caches.open(DYNAMIC_CACHE).then(cache => cache.put(request, clone));
-          }
-          return response;
-        })
-        .catch(() => caches.match(request))
-    );
+    event.respondWith(fetch(request).catch(() => fetch("/index.html")));
     return;
   }
 
-  // 3) Assets statiques → Cache First
+  // Cache-first pour les assets
   event.respondWith(
     caches.match(request).then(cached => {
       return (
         cached ||
-        fetch(request)
-          .then(response => {
-            const clone = response.clone();
-            caches.open(DYNAMIC_CACHE).then(cache => cache.put(request, clone));
-            return response;
-          })
-          .catch(() => {
-            if (request.destination === "image") {
-              return caches.match("/assets/logo.svg");
-            }
-          })
+        fetch(request).then(response => {
+          const clone = response.clone();
+          caches.open(STATIC_CACHE).then(cache => cache.put(request, clone));
+          return response;
+        })
       );
     })
   );
