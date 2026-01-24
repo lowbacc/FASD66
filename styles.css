@@ -25,21 +25,21 @@ body {
 }
 
 /* =========================================================
-   HEADER — PAGE D’ACCUEIL UNIQUEMENT
+   HEADER — PAGE D’ACCUEIL
 ========================================================= */
 .homepage .site-header {
-  background: transparent;
-  padding: 8px 14px;
-  position: fixed;
+  background: transparent !important;
+  padding: 8px 14px !important;
+  position: fixed !important;
   left: 0; right: 0; top: 0;
-  z-index: 60;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  z-index: 2000 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 /* =========================================================
-   HEADER — TOUTES LES AUTRES PAGES
+   HEADER — AUTRES PAGES
 ========================================================= */
 :not(.homepage) .site-header {
   background: rgba(0, 0, 0, 0.55);
@@ -50,7 +50,6 @@ body {
   z-index: 1000;
 }
 
-/* Logo */
 .header-inner {
   width: 100%;
   max-width: 1100px;
@@ -70,13 +69,10 @@ body {
 .logo-link:hover .logo-small { transform: scale(1.06); }
 
 /* =========================================================
-   NAVIGATION — MENU SOMBRE + SOUS-MENUS + BURGER
+   NAVIGATION
 ========================================================= */
-
-/* Empêche l’ancien menu d’interférer */
 .main-nav { display: none !important; }
 
-/* Structure */
 .nav-menu { display: flex; }
 .nav-list {
   display: flex;
@@ -86,7 +82,6 @@ body {
   padding: 0;
 }
 
-/* Liens */
 .nav-item > a,
 .submenu-toggle {
   color: white !important;
@@ -103,7 +98,7 @@ body {
 }
 
 /* Sous-menus */
-.has-submenu { position: relative; }
+.has-submenu { position: relative; padding-bottom: 20px; }
 .submenu {
   position: absolute;
   top: 36px;
@@ -125,7 +120,6 @@ body {
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* Hover sur PC */
 @media (min-width: 900px) {
   .has-submenu:hover .submenu { display: block; }
 }
@@ -140,6 +134,7 @@ body {
   background: none;
   border: none;
   cursor: pointer;
+  z-index: 3000; /* IMPORTANT */
 }
 .nav-burger span {
   width: 26px;
@@ -161,6 +156,7 @@ body {
     flex-direction: column;
     padding: 20px;
     transition: right 0.3s ease;
+    z-index: 2500;
   }
   .nav-menu.open { right: 0; }
 
@@ -184,22 +180,33 @@ body {
 }
 
 /* =========================================================
-   LOGO GÉANT — PAGE D’ACCUEIL
+   LOGO — PAGE D’ACCUEIL
 ========================================================= */
-.homepage .logo-wrap {
-  width: min(100vmin, 1400px) !important;
-  height: min(100vmin, 1400px) !important;
-  max-width: 100%;
-  max-height: 100%;
-  overflow: visible;
+.homepage .hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 0;
 }
 
-/* Logo normal */
-.logo-wrap {
-  width: min(98vmin, 1100px);
-  height: min(60vmin, 700px);
+.homepage .logo-wrap {
+  width: min(100vmin, 1400px);
+  height: min(100vmin, 1400px);
   position: relative;
 }
+
+/* Zones cliquables UNIQUEMENT sur la page d'accueil */
+.homepage .half {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  cursor: pointer;
+  z-index: 60;
+}
+.homepage .half.left { left: 0; }
+.homepage .half.right { right: 0; }
 
 /* Animation split */
 .logo-img {
@@ -236,7 +243,7 @@ h1 { color: var(--card); margin-top: 0; }
 h2 { color: var(--text); margin-bottom: 8px; }
 
 /* =========================================================
-   CONTACT — FORMULAIRES + DROPDOWN
+   CONTACT
 ========================================================= */
 .contact-dropdown {
   position: relative;
@@ -267,6 +274,7 @@ h2 { color: var(--text); margin-bottom: 8px; }
   z-index: 20;
 }
 .dropdown-menu.open { display: block; }
+
 .dropdown-menu button {
   width: 100%;
   padding: 10px 15px;
@@ -280,7 +288,6 @@ h2 { color: var(--text); margin-bottom: 8px; }
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* Formulaires masqués par défaut */
 .contact-form-phys,
 .contact-form-intel {
   display: none;
@@ -305,92 +312,9 @@ h2 { color: var(--text); margin-bottom: 8px; }
   .btn.primary { width: 100%; }
 }
 
-/* Correction : header centré uniquement sur la page d'accueil */
-.homepage .site-header {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  background: transparent !important;
-  position: fixed !important;
-  top: 0; left: 0; right: 0;
-  padding: 8px 14px !important;
-  z-index: 2000;
-}
-
-/* Empêcher le menu sombre d'apparaître sur la page d'accueil */
-.homepage .nav-menu,
-.homepage .nav-burger {
-  display: none !important;
-}
-
-/* Correction : zone de hover élargie pour éviter la fermeture du menu */
-.has-submenu {
-  padding-bottom: 20px; /* augmente la zone de hover */
-}
-
-.nav-header .submenu {
-  margin-top: 4px; /* rapproche le sous-menu du bouton */
-}
-
-/* Correction : header centré uniquement sur la page d'accueil */
-.homepage .site-header {
-  background: transparent !important;
-  position: fixed !important;
-  top: 0; left: 0; right: 0;
-  padding: 8px 14px !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  z-index: 2000;
-}
-
-/* Masquer le menu sur la page d'accueil */
-.homepage .nav-menu,
-.homepage .nav-burger {
-  display: none !important;
-}
-
-/* Zones cliquables sur le logo de la page d'accueil */
-.half {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 50%;
-  cursor: pointer;
-  z-index: 60;
-}
-.half.left { left: 0; }
-.half.right { right: 0; }
-
-/* Centrage parfait du logo sur la page d'accueil */
-.homepage .hero {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  padding: 0;
-}
-
-/* Logo géant */
-.logo-wrap {
-  width: min(100vmin, 1400px);
-  height: min(100vmin, 1400px);
-  position: relative;
-}
-
-/* Zones cliquables */
-.half {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 50%;
-  cursor: pointer;
-  z-index: 60;
-}
-.half.left { left: 0; }
-.half.right { right: 0; }
-
-/* --- FORMULAIRES --- */
+/* =========================================================
+   FORMULAIRES
+========================================================= */
 form {
   max-width: 600px;
   margin: 2rem auto;
@@ -406,9 +330,7 @@ form h2 {
   color: #f0f0f0;
 }
 
-.form-block {
-  margin-bottom: 1.2rem;
-}
+.form-block { margin-bottom: 1.2rem; }
 
 .form-block label {
   display: block;
