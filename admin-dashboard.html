@@ -5,14 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FASD — Admin Dashboard</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="manifest" href="manifest.json">
-
 
   <style>
-    /* ----------------------------------------------------
-       OPTIMISATION MOBILE (sans casser ton design)
-    ---------------------------------------------------- */
-
     .admin-section {
       background: #1a1a1a;
       padding: 1.2rem;
@@ -56,7 +50,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* FORMULAIRES */
     .form-block {
       margin-bottom: 1rem;
     }
@@ -75,7 +68,6 @@
       resize: vertical;
     }
 
-    /* CARTES */
     .admin-card {
       background: #222;
       padding: 1rem;
@@ -84,7 +76,6 @@
       border: 1px solid #333;
     }
 
-    /* BOUTONS */
     .btn {
       padding: 0.6rem 1rem;
       border-radius: 6px;
@@ -103,7 +94,6 @@
       opacity: 0.85;
     }
 
-    /* MOBILE */
     @media (max-width: 600px) {
       h1 {
         font-size: 1.6rem;
@@ -134,9 +124,7 @@
 
       <button id="logoutBtn" class="btn primary" style="margin-bottom:2rem;">Déconnexion</button>
 
-      <!-- ----------------------------- -->
       <!-- POSTS -->
-      <!-- ----------------------------- -->
       <section id="posts" class="admin-section">
         <div class="section-header">
           <h2>Créer un post</h2>
@@ -176,9 +164,7 @@
         </div>
       </section>
 
-      <!-- ----------------------------- -->
       <!-- PROJETS -->
-      <!-- ----------------------------- -->
       <section id="projects" class="admin-section">
         <div class="section-header">
           <h2>Créer un projet</h2>
@@ -235,9 +221,7 @@
         </div>
       </section>
 
-      <!-- ----------------------------- -->
       <!-- RESSOURCES -->
-      <!-- ----------------------------- -->
       <section id="resources" class="admin-section">
         <div class="section-header">
           <h2>Ajouter une ressource</h2>
@@ -286,9 +270,7 @@
         </div>
       </section>
 
-      <!-- ----------------------------- -->
       <!-- SIGNALEMENTS -->
-      <!-- ----------------------------- -->
       <section id="reports" class="admin-section">
         <div class="section-header">
           <h2>Signalements d’erreurs</h2>
@@ -303,22 +285,22 @@
     </div>
   </main>
 
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script>
-    /* -----------------------------
-       AUTH
-    ------------------------------*/
+    // Auth locale (comme avant)
     if (localStorage.getItem("adminLoggedIn") !== "true") {
       window.location.href = "admin-login.html";
     }
 
+    const logoutBtn = document.getElementById("logoutBtn");
     logoutBtn.onclick = () => {
       localStorage.removeItem("adminLoggedIn");
       window.location.href = "admin-login.html";
     };
 
-    /* -----------------------------
-       SECTIONS REPLIABLES
-    ------------------------------*/
+    // Sections repliables
     document.querySelectorAll(".admin-section").forEach(section => {
       const header = section.querySelector(".section-header");
       const content = section.querySelector(".section-content");
@@ -329,14 +311,32 @@
       };
     });
 
-    /* -----------------------------
-       POSTS
-    ------------------------------*/
-    function loadPosts() {
-      const posts = JSON.parse(localStorage.getItem("posts") || "[]");
+    // --- Supabase init ---
+    const supabaseClient = supabase.createClient(
+      "https://vanhcaicgzvavoqcnvbm.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbmhjYWljZ3p2YXZvcWNudmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNDgwNTQsImV4cCI6MjA4NDgyNDA1NH0.PG_hpNFzZH9zGAVngpgKYUnS8_9LO7PHY72ilGojAXU"
+    );
+
+    // -----------------------------
+    // POSTS
+    // -----------------------------
+    const postForm = document.getElementById("postForm");
+    const postsList = document.getElementById("postsList");
+
+    async function loadPosts() {
+      const { data, error } = await supabaseClient
+        .from("posts")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        postsList.innerHTML = "Erreur de chargement des posts";
+        return;
+      }
+
       postsList.innerHTML = "";
 
-      posts.forEach((post, index) => {
+      data.forEach(post => {
         const div = document.createElement("div");
         div.className = "admin-card";
 
@@ -344,98 +344,149 @@
           <h3>${post.title}</h3>
           <p><strong>Emplacement :</strong> ${post.location}</p>
           <p>${post.content}</p>
-          <button class="btn delete-post" data-index="${index}">Supprimer</button>
+          <button class="btn delete-post" data-id="${post.id}">Supprimer</button>
         `;
 
         postsList.appendChild(div);
       });
 
       document.querySelectorAll(".delete-post").forEach(btn => {
-        btn.onclick = () => {
-          const posts = JSON.parse(localStorage.getItem("posts") || "[]");
-          posts.splice(btn.dataset.index, 1);
-          localStorage.setItem("posts", JSON.stringify(posts));
-          loadPosts();
-        };
+        btn.onclick = () => deletePost(btn.dataset.id);
       });
     }
 
-    postForm.onsubmit = e => {
+    async function deletePost(id) {
+      const { error } = await supabaseClient
+        .from("posts")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        alert("Erreur suppression post : " + error.message);
+        return;
+      }
+
+      loadPosts();
+    }
+
+    postForm.onsubmit = async (e) => {
       e.preventDefault();
-      const posts = JSON.parse(localStorage.getItem("posts") || "[]");
 
-      posts.push({
-        title: postTitle.value,
-        content: postContent.value,
-        location: postLocation.value,
-        date: new Date().toISOString()
-      });
+      const { error } = await supabaseClient
+        .from("posts")
+        .insert({
+          title: postTitle.value,
+          content: postContent.value,
+          location: postLocation.value
+        });
 
-      localStorage.setItem("posts", JSON.stringify(posts));
+      if (error) {
+        alert("Erreur création post : " + error.message);
+        return;
+      }
+
       postForm.reset();
       loadPosts();
     };
 
-    /* -----------------------------
-       PROJETS
-    ------------------------------*/
-    function loadProjects() {
-      const projects = JSON.parse(localStorage.getItem("projects") || "[]");
+    // -----------------------------
+    // PROJECTS
+    // -----------------------------
+    const projectForm = document.getElementById("projectForm");
+    const projectsList = document.getElementById("projectsList");
+
+    async function loadProjects() {
+      const { data, error } = await supabaseClient
+        .from("projects")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        projectsList.innerHTML = "Erreur de chargement des projets";
+        return;
+      }
+
       projectsList.innerHTML = "";
 
-      projects.forEach((p, index) => {
+      data.forEach(p => {
         const div = document.createElement("div");
         div.className = "admin-card";
 
         div.innerHTML = `
           <h3>${p.title}</h3>
           <p><strong>Statut :</strong> ${p.status}</p>
-          <p><strong>Dates :</strong> ${p.start} → ${p.end || "En cours"}</p>
+          <p><strong>Dates :</strong> ${p.start_date || ""} → ${p.end_date || "En cours"}</p>
           ${p.link ? `<p><a href="${p.link}" target="_blank">Lien externe</a></p>` : ""}
-          <p>${p.description}</p>
-          <button class="btn delete-project" data-index="${index}">Supprimer</button>
+          <p>${p.description || ""}</p>
+          <button class="btn delete-project" data-id="${p.id}">Supprimer</button>
         `;
 
         projectsList.appendChild(div);
       });
 
       document.querySelectorAll(".delete-project").forEach(btn => {
-        btn.onclick = () => {
-          const projects = JSON.parse(localStorage.getItem("projects") || "[]");
-          projects.splice(btn.dataset.index, 1);
-          localStorage.setItem("projects", JSON.stringify(projects));
-          loadProjects();
-        };
+        btn.onclick = () => deleteProject(btn.dataset.id);
       });
     }
 
-    projectForm.onsubmit = e => {
+    async function deleteProject(id) {
+      const { error } = await supabaseClient
+        .from("projects")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        alert("Erreur suppression projet : " + error.message);
+        return;
+      }
+
+      loadProjects();
+    }
+
+    projectForm.onsubmit = async (e) => {
       e.preventDefault();
-      const projects = JSON.parse(localStorage.getItem("projects") || "[]");
 
-      projects.push({
-        title: projectTitle.value,
-        status: projectStatus.value,
-        start: projectStart.value,
-        end: projectEnd.value,
-        image: projectImage.value,
-        link: projectLink.value,
-        description: projectDescription.value
-      });
+      const { error } = await supabaseClient
+        .from("projects")
+        .insert({
+          title: projectTitle.value,
+          status: projectStatus.value,
+          start_date: projectStart.value,
+          end_date: projectEnd.value || null,
+          image: projectImage.value || null,
+          link: projectLink.value || null,
+          description: projectDescription.value
+        });
 
-      localStorage.setItem("projects", JSON.stringify(projects));
+      if (error) {
+        alert("Erreur création projet : " + error.message);
+        return;
+      }
+
       projectForm.reset();
       loadProjects();
     };
 
-    /* -----------------------------
-       RESSOURCES
-    ------------------------------*/
-    function loadResources() {
-      const resources = JSON.parse(localStorage.getItem("resources") || "[]");
+    // -----------------------------
+    // RESOURCES
+    // -----------------------------
+    const resourceForm = document.getElementById("resourceForm");
+    const resourcesList = document.getElementById("resourcesList");
+
+    async function loadResources() {
+      const { data, error } = await supabaseClient
+        .from("resources")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        resourcesList.innerHTML = "Erreur de chargement des ressources";
+        return;
+      }
+
       resourcesList.innerHTML = "";
 
-      resources.forEach((r, index) => {
+      data.forEach(r => {
         const div = document.createElement("div");
         div.className = "admin-card";
 
@@ -445,85 +496,113 @@
           ${r.category ? `<p><strong>Catégorie :</strong> ${r.category}</p>` : ""}
           <p>${r.description}</p>
           <p><a href="${r.link}" target="_blank">Ouvrir</a></p>
-          <button class="btn delete-resource" data-index="${index}">Supprimer</button>
+          <button class="btn delete-resource" data-id="${r.id}">Supprimer</button>
         `;
 
         resourcesList.appendChild(div);
       });
 
       document.querySelectorAll(".delete-resource").forEach(btn => {
-        btn.onclick = () => {
-          const resources = JSON.parse(localStorage.getItem("resources") || "[]");
-          resources.splice(btn.dataset.index, 1);
-          localStorage.setItem("resources", JSON.stringify(resources));
-          loadResources();
-        };
+        btn.onclick = () => deleteResource(btn.dataset.id);
       });
     }
 
-    resourceForm.onsubmit = e => {
+    async function deleteResource(id) {
+      const { error } = await supabaseClient
+        .from("resources")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        alert("Erreur suppression ressource : " + error.message);
+        return;
+      }
+
+      loadResources();
+    }
+
+    resourceForm.onsubmit = async (e) => {
       e.preventDefault();
-      const resources = JSON.parse(localStorage.getItem("resources") || "[]");
 
-      resources.push({
-        title: resourceTitle.value,
-        type: resourceType.value,
-        category: resourceCategory.value,
-        link: resourceLink.value,
-        description: resourceDescription.value
-      });
+      const { error } = await supabaseClient
+        .from("resources")
+        .insert({
+          title: resourceTitle.value,
+          type: resourceType.value,
+          category: resourceCategory.value || null,
+          link: resourceLink.value,
+          description: resourceDescription.value
+        });
 
-      localStorage.setItem("resources", JSON.stringify(resources));
+      if (error) {
+        alert("Erreur création ressource : " + error.message);
+        return;
+      }
+
       resourceForm.reset();
       loadResources();
     };
 
-    /* -----------------------------
-       SIGNALEMENTS
-    ------------------------------*/
-    function loadReports() {
-      const reports = JSON.parse(localStorage.getItem("reports") || "[]");
+    // -----------------------------
+    // REPORTS
+    // -----------------------------
+    const reportsList = document.getElementById("reportsList");
+
+    async function loadReports() {
+      const { data, error } = await supabaseClient
+        .from("reports")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        reportsList.innerHTML = "Erreur de chargement des signalements";
+        return;
+      }
+
       reportsList.innerHTML = "";
 
-      reports.forEach((rep, index) => {
+      data.forEach(rep => {
         const div = document.createElement("div");
         div.className = "admin-card";
 
-        const date = new Date(rep.date).toLocaleDateString("fr-FR");
+        const date = rep.created_at
+          ? new Date(rep.created_at).toLocaleDateString("fr-FR")
+          : "";
 
         div.innerHTML = `
-          <h3>${rep.postTitle}</h3>
-          <p>${rep.message}</p>
+          <h3>${rep.post_title || "Signalement"}</h3>
+          <p>${rep.message || ""}</p>
           <p style="opacity:0.7;">${date}</p>
-          <button class="btn delete-report" data-index="${index}">Supprimer</button>
+          <button class="btn delete-report" data-id="${rep.id}">Supprimer</button>
         `;
 
         reportsList.appendChild(div);
       });
 
       document.querySelectorAll(".delete-report").forEach(btn => {
-        btn.onclick = () => {
-          const reports = JSON.parse(localStorage.getItem("reports") || "[]");
-          reports.splice(btn.dataset.index, 1);
-          localStorage.setItem("reports", JSON.stringify(reports));
-          loadReports();
-        };
+        btn.onclick = () => deleteReport(btn.dataset.id);
       });
     }
 
-    /* -----------------------------
-       INIT
-    ------------------------------*/
+    async function deleteReport(id) {
+      const { error } = await supabaseClient
+        .from("reports")
+        .delete()
+        .eq("id", id);
+
+      if (error) {
+        alert("Erreur suppression signalement : " + error.message);
+        return;
+      }
+
+      loadReports();
+    }
+
+    // INIT
     loadPosts();
     loadProjects();
     loadResources();
     loadReports();
-  </script>
-
-  <script>
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("service-worker.js");
-    }
   </script>
 
 </body>

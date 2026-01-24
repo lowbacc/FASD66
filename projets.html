@@ -75,18 +75,29 @@
     <p>© FASD — Association</p>
   </footer>
 
-  <script src="main.js"></script>
+  <!-- SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    // Charger les projets depuis le localStorage
-    const projects = JSON.parse(localStorage.getItem("projects") || "[]");
+    const supabaseClient = supabase.createClient(
+      "https://vanhcaicgzvavoqcnvbm.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbmhjYWljZ3p2YXZvcWNudmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNDgwNTQsImV4cCI6MjA4NDgyNDA1NH0.PG_hpNFzZH9zGAVngpgKYUnS8_9LO7PHY72ilGojAXU"
+    );
 
-    const container = document.getElementById("projectsContainer");
+    async function loadProjects() {
+      const { data, error } = await supabaseClient
+        .from("projects")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    if (projects.length === 0) {
-      container.innerHTML = "<p>Aucun projet pour le moment.</p>";
-    } else {
-      projects.forEach(project => {
+      const container = document.getElementById("projectsContainer");
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = "<p>Aucun projet pour le moment.</p>";
+        return;
+      }
+
+      data.forEach(project => {
         const div = document.createElement("div");
         div.style.padding = "1.5rem";
         div.style.margin = "1.5rem 0";
@@ -104,7 +115,7 @@
 
           <p style="opacity:0.8;margin:0.3rem 0;">
             <strong>Dates :</strong> 
-            ${project.start || "?"} → ${project.end || "En cours"}
+            ${project.start_date || "?"} → ${project.end_date || "En cours"}
           </p>
 
           <p style="margin-top:0.8rem;">${project.description}</p>
@@ -119,6 +130,8 @@
         container.appendChild(div);
       });
     }
+
+    loadProjects();
   </script>
 
 </body>

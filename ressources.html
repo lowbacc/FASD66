@@ -86,20 +86,41 @@
     <p>© FASD — Association</p>
   </footer>
 
-  <script src="main.js"></script>
+  <!-- SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    // Charger les ressources depuis le localStorage
-    const resources = JSON.parse(localStorage.getItem("resources") || "[]");
+    const supabaseClient = supabase.createClient(
+      "https://vanhcaicgzvavoqcnvbm.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbmhjYWljZ3p2YXZvcWNudmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNDgwNTQsImV4cCI6MjA4NDgyNDA1NH0.PG_hpNFzZH9zGAVngpgKYUnS8_9LO7PHY72ilGojAXU"
+    );
 
-    const container = document.getElementById("resourcesContainer");
+    let allResources = [];
+
+    async function loadResources() {
+      const { data, error } = await supabaseClient
+        .from("resources")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      const container = document.getElementById("resourcesContainer");
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = "<p>Aucune ressource trouvée.</p>";
+        return;
+      }
+
+      allResources = data;
+      displayResources("Tous");
+    }
 
     function displayResources(filter = "Tous") {
+      const container = document.getElementById("resourcesContainer");
       container.innerHTML = "";
 
       const filtered = filter === "Tous"
-        ? resources
-        : resources.filter(r => r.type === filter);
+        ? allResources
+        : allResources.filter(r => r.type === filter);
 
       if (filtered.length === 0) {
         container.innerHTML = "<p>Aucune ressource trouvée.</p>";
@@ -137,8 +158,8 @@
       });
     }
 
-    // Affichage initial
-    displayResources();
+    // Chargement initial
+    loadResources();
 
     // Gestion des filtres
     document.querySelectorAll(".filter-btn").forEach(btn => {

@@ -77,31 +77,39 @@
     <p>© FASD — Association</p>
   </footer>
 
-  <script src="main.js"></script>
+  <!-- SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
-    // Charger les posts depuis le localStorage
-    const posts = JSON.parse(localStorage.getItem("posts") || "[]");
+    const supabaseClient = supabase.createClient(
+      "https://vanhcaicgzvavoqcnvbm.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbmhjYWljZ3p2YXZvcWNudmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNDgwNTQsImV4cCI6MjA4NDgyNDA1NH0.PG_hpNFzZH9zGAVngpgKYUnS8_9LO7PHY72ilGojAXU"
+    );
 
-    // Filtrer uniquement ceux destinés au coin presse Défense Physique
-    const filteredPosts = posts
-      .filter(p => p.location === "physique-presse")
-      .sort((a, b) => new Date(b.date) - new Date(a.date)); // plus récent en premier
+    async function loadPress() {
+      const { data, error } = await supabaseClient
+        .from("posts")
+        .select("*")
+        .eq("location", "physique-presse")
+        .order("created_at", { ascending: false });
 
-    const container = document.createElement("div");
-    container.style.marginTop = "2rem";
+      const container = document.createElement("div");
+      container.style.marginTop = "2rem";
 
-    if (filteredPosts.length === 0) {
-      container.innerHTML = "<p>Aucun article de presse pour le moment.</p>";
-    } else {
-      filteredPosts.forEach(post => {
+      if (error || !data || data.length === 0) {
+        container.innerHTML = "<p>Aucun article de presse pour le moment.</p>";
+        document.querySelector(".page-content").appendChild(container);
+        return;
+      }
+
+      data.forEach(post => {
         const div = document.createElement("div");
         div.style.padding = "1rem";
         div.style.margin = "1rem 0";
         div.style.background = "#1e1e1e";
         div.style.borderRadius = "6px";
 
-        const date = new Date(post.date).toLocaleDateString("fr-FR");
+        const date = new Date(post.created_at).toLocaleDateString("fr-FR");
 
         div.innerHTML = `
           <h3>${post.title}</h3>
@@ -121,13 +129,13 @@
 
         container.appendChild(div);
       });
+
+      document.querySelector(".page-content").appendChild(container);
     }
 
-    document.querySelector(".page-content").appendChild(container);
+    loadPress();
 
-    /* -----------------------------
-       PARTAGER UN POST
-    ------------------------------*/
+    /* PARTAGER */
     document.addEventListener("click", (e) => {
       if (e.target.classList.contains("share-btn")) {
         const title = e.target.dataset.title;
@@ -135,11 +143,7 @@
         const url = window.location.href;
 
         if (navigator.share) {
-          navigator.share({
-            title,
-            text: content,
-            url
-          });
+          navigator.share({ title, text: content, url });
         } else {
           navigator.clipboard.writeText(url);
           alert("Lien copié dans le presse-papier !");
@@ -147,28 +151,28 @@
       }
     });
 
-    /* -----------------------------
-       SIGNALER UNE ERREUR
-    ------------------------------*/
-    document.addEventListener("click", (e) => {
+    /* SIGNALER UNE ERREUR */
+    document.addEventListener("click", async (e) => {
       if (e.target.classList.contains("error-btn")) {
         const title = e.target.dataset.title;
 
         const message = prompt(
-          "Décrivez l’erreur que vous avez trouvée dans le post :\n\n" + title
+          "Décrivez l’erreur que vous avez trouvée dans l’article :\n\n" + title
         );
 
         if (!message) return;
 
-        const reports = JSON.parse(localStorage.getItem("reports") || "[]");
+        const { error } = await supabaseClient
+          .from("reports")
+          .insert({
+            post_title: title,
+            message: message
+          });
 
-        reports.push({
-          postTitle: title,
-          message,
-          date: new Date().toISOString()
-        });
-
-        localStorage.setItem("reports", JSON.stringify(reports));
+        if (error) {
+          alert("Erreur lors de l’envoi du signalement.");
+          return;
+        }
 
         alert("Merci ! Votre signalement a été enregistré.");
       }
