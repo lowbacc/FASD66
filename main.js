@@ -1,4 +1,7 @@
 // main.js : tactile, clavier et gestion du focus pour la version à deux images + formulaire(s)
+// + gestion optionnelle de l'upload d'images pour le formulaire admin (Supabase Storage)
+// NOTE : la partie Supabase ne s'exécute que si un client Supabase est disponible sur window.supabaseClient
+
 document.addEventListener('DOMContentLoaded', () => {
   const wrap = document.getElementById('logoWrap');
   if (wrap) {
@@ -58,7 +61,157 @@ document.addEventListener('DOMContentLoaded', () => {
   // forms on different pages
   handleForm('contactForm');       // intellectuelle
   handleForm('contactFormPhys');   // physique
-});
+
+  /* ---------------------------------------------------------
+     ADMIN : upload d'image vers Supabase Storage (optionnel)
+     - Ne s'active que si un formulaire #postForm existe
+     - Et si window.supabaseClient est défini (client Supabase initialisé)
+  --------------------------------------------------------- */
+
+  const postForm = document.getElementById('postForm');
+  if (postForm) {
+    // Vérifier la présence du client Supabase
+    const supabaseClient = window.supabaseClient || null;
+    if (!supabaseClient) {
+      // Si le client n'est pas présent, on laisse le formulaire fonctionner avec URL seulement
+      console.warn('Supabase client introuvable sur window.supabaseClient — upload d\'image désactivé.');
+    }
+
+    const fileInput = document.getElementById('imageFile');
+    const urlInput = document.getElementById('imageUrl');
+    const previewWrap = document.getElementById('previewWrap');
+
+    // Aperçu local du fichier sélectionné
+    if (fileInput && previewWrap) {
+      fileInput.addEventListener('change', () => {
+        previewWrap.innerHTML = '';
+        const file = fileInput.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+          previewWrap.textContent = 'Fichier non image.';
+          return;
+        }
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.style.maxWidth = '240px';
+        img.style.maxHeight = '160px';
+        img.style.borderRadius = '6px';
+        img.onload = () => URL.revokeObjectURL(img.src);
+        previewWrap.appendChild(img);
+      });
+    }
+
+    // Helper : upload et récupération d'URL publique (si supabaseClient présent)
+    async function uploadImageAndGetUrl(file) {
+      if (!file) return null;
+      if (!supabaseClient) throw new Error('Supabase client non initialisé.');
+
+      const MAX_MB = 6;
+      if (file.size > MAX_MB * 1024 * 1024) {
+        throw new Error(`Image trop lourde. Max ${MAX_MB} Mo.`);
+      }
+
+      // Générer un nom de fichier sûr et unique
+      const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const ext = rawExt.replace(/[^a-z0-9]/gi, '') || 'jpg';
+      const uuid = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + '-' + Math.floor(Math.random() * 1e6);
+      const filename = `posts/${Date.now()}-${uuid}.${ext}`;
+
+      // Nom du bucket (à adapter si nécessaire)
+      const BUCKET = 'images';
+
+      // Upload
+      const { data: uploadData, error: uploadError } = await supabaseClient
+        .storage
+        .from(BUCKET)
+        .upload(filename, file, { cacheControl: '3600', upsert: false });
+
+      if (uploadError) {
+        // Si le fichier existe déjà et upsert=false, Supabase renverra une erreur ; on la propage
+        throw uploadError;
+      }
+
+      // Récupérer URL publique (si bucket public)
+      const { data: publicData, error: publicError } = supabaseClient
+        .storage
+        .from(BUCKET)
+        .getPublicUrl(filename);
+
+      if (publicError) {
+        // Si erreur, on renvoie quand même le chemin interne pour debug
+        throw publicError;
+      }
+
+      return publicData.publicUrl;
+    }
+
+    // Soumission du formulaire admin
+    postForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const title = (postForm.querySelector('#title') || {}).value?.trim?.() || '';
+      const content = (postForm.querySelector('#content') || {}).value?.trim?.() || '';
+      const urlField = urlInput ? urlInput.value.trim() : '';
+      const file = fileInput ? fileInput.files[0] : null;
+
+      // Validation minimale
+      if (!title) {
+        alert('Merci de renseigner un titre.');
+        return;
+      }
+
+      try {
+        let imageUrl = null;
+
+        // Priorité : fichier uploadé > URL manuelle
+        if (file) {
+          if (!supabaseClient) {
+            alert('Impossible d\'uploader l\'image : Supabase non initialisé. Utilisez une URL ou initialisez le client.');
+            return;
+          }
+          // Indicateur simple (on peut améliorer avec une barre de progression)
+          const submitBtn = postForm.querySelector('button[type="submit"]');
+          const originalText = submitBtn ? submitBtn.textContent : null;
+          if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Upload en cours…'; }
+
+          imageUrl = await uploadImageAndGetUrl(file);
+
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
+        } else if (urlField) {
+          imageUrl = urlField;
+        }
+
+        // Insérer le post dans Supabase si le client est présent
+        if (!supabaseClient) {
+          // Si pas de client, on simule un enregistrement local (ou on peut envoyer via fetch vers un endpoint)
+          alert('Supabase non initialisé : le post n\'a pas été envoyé. (Test local)');
+          postForm.reset();
+          if (previewWrap) previewWrap.innerHTML = '';
+          return;
+        }
+
+        const { error } = await supabaseClient
+          .from('posts')
+          .insert({
+            title,
+            content,
+            image_url: imageUrl,
+            // adapter la colonne location selon ton usage ; ici on laisse vide ou on peut ajouter un champ select
+            location: postForm.dataset.location || null
+          });
+
+        if (error) throw error;
+
+        alert('Post publié.');
+        postForm.reset();
+        if (previewWrap) previewWrap.innerHTML = '';
+      } catch (err) {
+        console.error(err);
+        alert('Erreur : ' + (err.message || JSON.stringify(err)));
+      }
+    });
+  } // fin bloc postForm
+}); // fin DOMContentLoaded
 
 /* ---------------------------------------------------------
    MENU BURGER (MOBILE)
@@ -69,7 +222,7 @@ const navMenu = document.querySelector(".nav-menu");
 
 if (burger) {
   burger.addEventListener("click", () => {
-    navMenu.classList.toggle("open");
+    if (navMenu) navMenu.classList.toggle("open");
   });
 }
 
@@ -85,7 +238,7 @@ submenuToggles.forEach(toggle => {
     if (window.innerWidth <= 900) {
       const parent = toggle.parentElement;
       const submenu = parent.querySelector(".submenu");
-      submenu.classList.toggle("open");
+      if (submenu) submenu.classList.toggle("open");
     }
   });
 });
@@ -98,7 +251,7 @@ document.addEventListener("click", (e) => {
   if (window.innerWidth > 900) return; // seulement mobile
 
   if (!e.target.closest(".nav-menu") && !e.target.closest(".nav-burger")) {
-    navMenu.classList.remove("open");
+    if (navMenu) navMenu.classList.remove("open");
 
     // fermer tous les sous-menus
     document.querySelectorAll(".submenu.open").forEach(sm => {
@@ -144,11 +297,11 @@ if (dropdownMenu) {
       dropdownMenu.classList.remove("open");
 
       if (choice === "physique") {
-        formPhys.style.display = "block";
-        formIntel.style.display = "none";
+        if (formPhys) formPhys.style.display = "block";
+        if (formIntel) formIntel.style.display = "none";
       } else if (choice === "intellectuelle") {
-        formPhys.style.display = "none";
-        formIntel.style.display = "block";
+        if (formPhys) formPhys.style.display = "none";
+        if (formIntel) formIntel.style.display = "block";
       }
     });
   });
@@ -161,12 +314,12 @@ if (dropdownMenu) {
 
 if (window.location.hash === "#physique" && formPhys) {
   formPhys.style.display = "block";
-  formIntel.style.display = "none";
-  dropdownBtn.textContent = "Défense Physique";
+  if (formIntel) formIntel.style.display = "none";
+  if (dropdownBtn) dropdownBtn.textContent = "Défense Physique";
 }
 
 if (window.location.hash === "#intellectuelle" && formIntel) {
   formIntel.style.display = "block";
-  formPhys.style.display = "none";
-  dropdownBtn.textContent = "Défense Intellectuelle";
+  if (formPhys) formPhys.style.display = "none";
+  if (dropdownBtn) dropdownBtn.textContent = "Défense Intellectuelle";
 }

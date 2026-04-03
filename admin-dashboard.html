@@ -112,6 +112,9 @@
         margin-top: 0.5rem;
       }
     }
+
+    /* preview image small */
+    #previewWrap img { display:block; max-width:320px; border-radius:6px; margin-top:8px; }
   </style>
 </head>
 <body>
@@ -132,8 +135,8 @@
         </div>
 
         <div class="section-content">
-          <form id="postForm">
-
+          <!-- Formulaire de post (titre, contenu, emplacement, image upload ou URL) -->
+          <form id="postForm" data-location="">
             <div class="form-block">
               <label for="postTitle">Titre du post</label>
               <input type="text" id="postTitle" required />
@@ -156,7 +159,21 @@
               </select>
             </div>
 
-            <button type="submit" class="btn primary">Publier</button>
+            <hr style="border-color:#222;margin:12px 0;" />
+
+            <div class="form-block">
+              <label for="imageFile">Image depuis l'appareil (optionnel)</label>
+              <input type="file" id="imageFile" accept="image/*" />
+            </div>
+
+            <div class="form-block">
+              <label for="imageUrl">Ou URL d'image (optionnel)</label>
+              <input type="url" id="imageUrl" placeholder="https://..." />
+            </div>
+
+            <div id="previewWrap" aria-live="polite"></div>
+
+            <button type="submit" class="btn primary" style="margin-top:12px;">Publier</button>
           </form>
 
           <h3 style="margin-top:2rem;">Posts existants</h3>
@@ -285,52 +302,109 @@
     </div>
   </main>
 
-  <!-- Supabase -->
+  <footer class="site-footer" style="margin-top:32px;">
+    <p>© FASD — Association</p>
+  </footer>
+
+  <!-- Supabase client : initialisation (valeurs fournies) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
   <script>
-    // Auth locale (comme avant)
-    if (localStorage.getItem("adminLoggedIn") !== "true") {
-      window.location.href = "admin-login.html";
-    }
-
-    const logoutBtn = document.getElementById("logoutBtn");
-    logoutBtn.onclick = () => {
-      localStorage.removeItem("adminLoggedIn");
-      window.location.href = "admin-login.html";
-    };
-
-    // Sections repliables
-    document.querySelectorAll(".admin-section").forEach(section => {
-      const header = section.querySelector(".section-header");
-      const content = section.querySelector(".section-content");
-
-      header.onclick = () => {
-        const isOpen = section.classList.toggle("open");
-        content.style.display = isOpen ? "block" : "none";
-      };
-    });
-
-    // --- Supabase init ---
+    // Initialisation Supabase (valeurs fournies)
     const supabaseClient = supabase.createClient(
       "https://vanhcaicgzvavoqcnvbm.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbmhjYWljZ3p2YXZvcWNudmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNDgwNTQsImV4cCI6MjA4NDgyNDA1NH0.PG_hpNFzZH9zGAVngpgKYUnS8_9LO7PHY72ilGojAXU"
     );
 
-    // -----------------------------
-    // POSTS
-    // -----------------------------
-    const postForm = document.getElementById("postForm");
-    const postsList = document.getElementById("postsList");
+    // Exposer globalement pour les autres scripts
+    window.supabaseClient = supabaseClient;
+  </script>
 
+  <!-- Script principal consolidé -->
+  <script>
+    /* =========================================================
+       UTIL HELPERS
+    ======================================================== */
+    const BUCKET = 'images';
+
+    function escapeHtml(str) {
+      if (!str && str !== 0) return '';
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function escapeAttr(str) {
+      if (!str && str !== 0) return '';
+      return String(str).replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+    }
+
+    async function uploadImageAndGetUrl(file) {
+      if (!file) return null;
+      if (!window.supabaseClient) throw new Error('Supabase client non initialisé.');
+
+      const MAX_MB = 6;
+      if (file.size > MAX_MB * 1024 * 1024) {
+        throw new Error(`Image trop lourde. Max ${MAX_MB} Mo.`);
+      }
+
+      const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const ext = rawExt.replace(/[^a-z0-9]/gi, '') || 'jpg';
+      const uuid = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + '-' + Math.floor(Math.random() * 1e6);
+      const filename = `posts/${Date.now()}-${uuid}.${ext}`;
+
+      const { data: uploadData, error: uploadError } = await window.supabaseClient
+        .storage
+        .from(BUCKET)
+        .upload(filename, file, { cacheControl: '3600', upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicData, error: publicError } = window.supabaseClient
+        .storage
+        .from(BUCKET)
+        .getPublicUrl(filename);
+
+      if (publicError) throw publicError;
+
+      return publicData.publicUrl;
+    }
+
+    /* =========================================================
+       AUTH LOCALE & LOGOUT
+    ======================================================== */
+    if (localStorage.getItem("adminLoggedIn") !== "true") {
+      // redirection immédiate si non connecté
+      window.location.href = "admin-login.html";
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+          localStorage.removeItem("adminLoggedIn");
+          window.location.href = "admin-login.html";
+        });
+      }
+    });
+
+    /* =========================================================
+       POSTS
+    ======================================================== */
     async function loadPosts() {
-      const { data, error } = await supabaseClient
+      const postsList = document.getElementById("postsList");
+      if (!postsList) return;
+
+      const { data, error } = await window.supabaseClient
         .from("posts")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
-        postsList.innerHTML = "Erreur de chargement des posts";
+        postsList.innerHTML = "<p>Erreur de chargement des posts</p>";
+        console.error(error);
         return;
       }
 
@@ -341,10 +415,13 @@
         div.className = "admin-card";
 
         div.innerHTML = `
-          <h3>${post.title}</h3>
-          <p><strong>Emplacement :</strong> ${post.location}</p>
-          <p>${post.content}</p>
-          <button class="btn delete-post" data-id="${post.id}">Supprimer</button>
+          <h3>${escapeHtml(post.title)}</h3>
+          <p><strong>Emplacement :</strong> ${escapeHtml(post.location || '')}</p>
+          ${post.image_url ? `<p><img src="${escapeAttr(post.image_url)}" alt="" style="max-width:200px;border-radius:6px;margin:8px 0;"></p>` : ''}
+          <p>${escapeHtml(post.content || '')}</p>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn delete-post" data-id="${post.id}">Supprimer</button>
+          </div>
         `;
 
         postsList.appendChild(div);
@@ -356,7 +433,9 @@
     }
 
     async function deletePost(id) {
-      const { error } = await supabaseClient
+      if (!confirm("Confirmer la suppression du post ?")) return;
+
+      const { error } = await window.supabaseClient
         .from("posts")
         .delete()
         .eq("id", id);
@@ -369,40 +448,21 @@
       loadPosts();
     }
 
-    postForm.onsubmit = async (e) => {
-      e.preventDefault();
-
-      const { error } = await supabaseClient
-        .from("posts")
-        .insert({
-          title: postTitle.value,
-          content: postContent.value,
-          location: postLocation.value
-        });
-
-      if (error) {
-        alert("Erreur création post : " + error.message);
-        return;
-      }
-
-      postForm.reset();
-      loadPosts();
-    };
-
-    // -----------------------------
-    // PROJECTS
-    // -----------------------------
-    const projectForm = document.getElementById("projectForm");
-    const projectsList = document.getElementById("projectsList");
-
+    /* =========================================================
+       PROJECTS
+    ======================================================== */
     async function loadProjects() {
-      const { data, error } = await supabaseClient
+      const projectsList = document.getElementById("projectsList");
+      if (!projectsList) return;
+
+      const { data, error } = await window.supabaseClient
         .from("projects")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
-        projectsList.innerHTML = "Erreur de chargement des projets";
+        projectsList.innerHTML = "<p>Erreur de chargement des projets</p>";
+        console.error(error);
         return;
       }
 
@@ -413,12 +473,14 @@
         div.className = "admin-card";
 
         div.innerHTML = `
-          <h3>${p.title}</h3>
-          <p><strong>Statut :</strong> ${p.status}</p>
-          <p><strong>Dates :</strong> ${p.start_date || ""} → ${p.end_date || "En cours"}</p>
-          ${p.link ? `<p><a href="${p.link}" target="_blank">Lien externe</a></p>` : ""}
-          <p>${p.description || ""}</p>
-          <button class="btn delete-project" data-id="${p.id}">Supprimer</button>
+          <h3>${escapeHtml(p.title)}</h3>
+          <p><strong>Statut :</strong> ${escapeHtml(p.status || '')}</p>
+          <p><strong>Dates :</strong> ${escapeHtml(p.start_date || '')} → ${escapeHtml(p.end_date || 'En cours')}</p>
+          ${p.link ? `<p><a href="${escapeAttr(p.link)}" target="_blank" rel="noopener">Lien externe</a></p>` : ""}
+          <p>${escapeHtml(p.description || '')}</p>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn delete-project" data-id="${p.id}">Supprimer</button>
+          </div>
         `;
 
         projectsList.appendChild(div);
@@ -430,7 +492,9 @@
     }
 
     async function deleteProject(id) {
-      const { error } = await supabaseClient
+      if (!confirm("Confirmer la suppression du projet ?")) return;
+
+      const { error } = await window.supabaseClient
         .from("projects")
         .delete()
         .eq("id", id);
@@ -443,44 +507,21 @@
       loadProjects();
     }
 
-    projectForm.onsubmit = async (e) => {
-      e.preventDefault();
-
-      const { error } = await supabaseClient
-        .from("projects")
-        .insert({
-          title: projectTitle.value,
-          status: projectStatus.value,
-          start_date: projectStart.value,
-          end_date: projectEnd.value || null,
-          image: projectImage.value || null,
-          link: projectLink.value || null,
-          description: projectDescription.value
-        });
-
-      if (error) {
-        alert("Erreur création projet : " + error.message);
-        return;
-      }
-
-      projectForm.reset();
-      loadProjects();
-    };
-
-    // -----------------------------
-    // RESOURCES
-    // -----------------------------
-    const resourceForm = document.getElementById("resourceForm");
-    const resourcesList = document.getElementById("resourcesList");
-
+    /* =========================================================
+       RESOURCES
+    ======================================================== */
     async function loadResources() {
-      const { data, error } = await supabaseClient
+      const resourcesList = document.getElementById("resourcesList");
+      if (!resourcesList) return;
+
+      const { data, error } = await window.supabaseClient
         .from("resources")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
-        resourcesList.innerHTML = "Erreur de chargement des ressources";
+        resourcesList.innerHTML = "<p>Erreur de chargement des ressources</p>";
+        console.error(error);
         return;
       }
 
@@ -491,12 +532,13 @@
         div.className = "admin-card";
 
         div.innerHTML = `
-          <h3>${r.title}</h3>
-          <p><strong>Type :</strong> ${r.type}</p>
-          ${r.category ? `<p><strong>Catégorie :</strong> ${r.category}</p>` : ""}
-          <p>${r.description}</p>
-          <p><a href="${r.link}" target="_blank">Ouvrir</a></p>
-          <button class="btn delete-resource" data-id="${r.id}">Supprimer</button>
+          <h3>${escapeHtml(r.title)}</h3>
+          <p><strong>Type :</strong> ${escapeHtml(r.type || '')} ${r.category ? `• <strong>Catégorie :</strong> ${escapeHtml(r.category)}` : ''}</p>
+          <p><a href="${escapeAttr(r.link)}" target="_blank" rel="noopener">Ouvrir le lien</a></p>
+          <p>${escapeHtml(r.description || '')}</p>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn delete-resource" data-id="${r.id}">Supprimer</button>
+          </div>
         `;
 
         resourcesList.appendChild(div);
@@ -508,7 +550,9 @@
     }
 
     async function deleteResource(id) {
-      const { error } = await supabaseClient
+      if (!confirm("Confirmer la suppression de la ressource ?")) return;
+
+      const { error } = await window.supabaseClient
         .from("resources")
         .delete()
         .eq("id", id);
@@ -521,41 +565,21 @@
       loadResources();
     }
 
-    resourceForm.onsubmit = async (e) => {
-      e.preventDefault();
-
-      const { error } = await supabaseClient
-        .from("resources")
-        .insert({
-          title: resourceTitle.value,
-          type: resourceType.value,
-          category: resourceCategory.value || null,
-          link: resourceLink.value,
-          description: resourceDescription.value
-        });
-
-      if (error) {
-        alert("Erreur création ressource : " + error.message);
-        return;
-      }
-
-      resourceForm.reset();
-      loadResources();
-    };
-
-    // -----------------------------
-    // REPORTS
-    // -----------------------------
-    const reportsList = document.getElementById("reportsList");
-
+    /* =========================================================
+       REPORTS
+    ======================================================== */
     async function loadReports() {
-      const { data, error } = await supabaseClient
+      const reportsList = document.getElementById("reportsList");
+      if (!reportsList) return;
+
+      const { data, error } = await window.supabaseClient
         .from("reports")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) {
-        reportsList.innerHTML = "Erreur de chargement des signalements";
+        reportsList.innerHTML = "<p>Erreur de chargement des signalements</p>";
+        console.error(error);
         return;
       }
 
@@ -565,15 +589,15 @@
         const div = document.createElement("div");
         div.className = "admin-card";
 
-        const date = rep.created_at
-          ? new Date(rep.created_at).toLocaleDateString("fr-FR")
-          : "";
+        const date = rep.created_at ? new Date(rep.created_at).toLocaleDateString("fr-FR") : "";
 
         div.innerHTML = `
-          <h3>${rep.post_title || "Signalement"}</h3>
-          <p>${rep.message || ""}</p>
+          <h3>${escapeHtml(rep.post_title || 'Signalement')}</h3>
+          <p>${escapeHtml(rep.message || '')}</p>
           <p style="opacity:0.7;">${date}</p>
-          <button class="btn delete-report" data-id="${rep.id}">Supprimer</button>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn delete-report" data-id="${rep.id}">Supprimer</button>
+          </div>
         `;
 
         reportsList.appendChild(div);
@@ -585,7 +609,9 @@
     }
 
     async function deleteReport(id) {
-      const { error } = await supabaseClient
+      if (!confirm("Confirmer la suppression du signalement ?")) return;
+
+      const { error } = await window.supabaseClient
         .from("reports")
         .delete()
         .eq("id", id);
@@ -598,12 +624,190 @@
       loadReports();
     }
 
-    // INIT
-    loadPosts();
-    loadProjects();
-    loadResources();
-    loadReports();
-  </script>
+    /* =========================================================
+       FORM SUBMISSIONS (delegation)
+    ======================================================== */
+    document.addEventListener('DOMContentLoaded', () => {
+      // POSTS form
+      const postForm = document.getElementById("postForm");
+      if (postForm) {
+        const postTitle = document.getElementById("postTitle");
+        const postContent = document.getElementById("postContent");
+        const postLocation = document.getElementById("postLocation");
+        const fileInput = document.getElementById("imageFile");
+        const urlInput = document.getElementById("imageUrl");
+        const previewWrap = document.getElementById("previewWrap");
 
+        if (fileInput && previewWrap) {
+          fileInput.addEventListener('change', () => {
+            previewWrap.innerHTML = '';
+            const file = fileInput.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+              previewWrap.textContent = 'Fichier non image.';
+              return;
+            }
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.style.maxWidth = '320px';
+            img.style.maxHeight = '240px';
+            img.style.borderRadius = '6px';
+            img.onload = () => URL.revokeObjectURL(img.src);
+            previewWrap.appendChild(img);
+          });
+        }
+
+        postForm.onsubmit = async (e) => {
+          e.preventDefault();
+
+          const title = postTitle ? postTitle.value.trim() : '';
+          const content = postContent ? postContent.value.trim() : '';
+          const location = postLocation ? postLocation.value : (postForm.dataset.location || '');
+          const urlField = urlInput ? urlInput.value.trim() : '';
+          const file = fileInput ? fileInput.files[0] : null;
+
+          if (!title) { alert('Merci de renseigner un titre.'); return; }
+          if (!location) { alert('Merci de choisir une destination de publication.'); return; }
+
+          try {
+            let imageUrl = null;
+
+            if (file) {
+              const submitBtn = postForm.querySelector('button[type="submit"]');
+              const originalText = submitBtn ? submitBtn.textContent : null;
+              if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Upload en cours…'; }
+
+              imageUrl = await uploadImageAndGetUrl(file);
+
+              if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
+            } else if (urlField) {
+              imageUrl = urlField;
+            }
+
+            const { error } = await window.supabaseClient
+              .from("posts")
+              .insert({
+                title,
+                content,
+                image_url: imageUrl,
+                location
+              });
+
+            if (error) {
+              alert("Erreur création post : " + error.message);
+              return;
+            }
+
+            postForm.reset();
+            if (previewWrap) previewWrap.innerHTML = '';
+            loadPosts();
+          } catch (err) {
+            console.error(err);
+            alert('Erreur : ' + (err.message || JSON.stringify(err)));
+          }
+        };
+      }
+
+      // PROJECTS form
+      const projectForm = document.getElementById("projectForm");
+      if (projectForm) {
+        const projectTitle = document.getElementById("projectTitle");
+        const projectStatus = document.getElementById("projectStatus");
+        const projectStart = document.getElementById("projectStart");
+        const projectEnd = document.getElementById("projectEnd");
+        const projectImage = document.getElementById("projectImage");
+        const projectLink = document.getElementById("projectLink");
+        const projectDescription = document.getElementById("projectDescription");
+
+        projectForm.onsubmit = async (e) => {
+          e.preventDefault();
+
+          const { error } = await window.supabaseClient
+            .from("projects")
+            .insert({
+              title: projectTitle.value,
+              status: projectStatus.value,
+              start_date: projectStart.value,
+              end_date: projectEnd.value || null,
+              image: projectImage.value || null,
+              link: projectLink.value || null,
+              description: projectDescription.value
+            });
+
+          if (error) {
+            alert("Erreur création projet : " + error.message);
+            return;
+          }
+
+          projectForm.reset();
+          loadProjects();
+        };
+      }
+
+      // RESOURCES form
+      const resourceForm = document.getElementById("resourceForm");
+      if (resourceForm) {
+        const resourceTitle = document.getElementById("resourceTitle");
+        const resourceType = document.getElementById("resourceType");
+        const resourceCategory = document.getElementById("resourceCategory");
+        const resourceLink = document.getElementById("resourceLink");
+        const resourceDescription = document.getElementById("resourceDescription");
+
+        resourceForm.onsubmit = async (e) => {
+          e.preventDefault();
+
+          const { error } = await window.supabaseClient
+            .from("resources")
+            .insert({
+              title: resourceTitle.value,
+              type: resourceType.value,
+              category: resourceCategory.value || null,
+              link: resourceLink.value,
+              description: resourceDescription.value
+            });
+
+          if (error) {
+            alert("Erreur création ressource : " + error.message);
+            return;
+          }
+
+          resourceForm.reset();
+          loadResources();
+        };
+      }
+
+      // Delegation for delete buttons (safety if elements are dynamic)
+      document.addEventListener("click", (e) => {
+        const delPost = e.target.closest(".delete-post");
+        if (delPost) { deletePost(delPost.dataset.id); return; }
+
+        const delProject = e.target.closest(".delete-project");
+        if (delProject) { deleteProject(delProject.dataset.id); return; }
+
+        const delResource = e.target.closest(".delete-resource");
+        if (delResource) { deleteResource(delResource.dataset.id); return; }
+
+        const delReport = e.target.closest(".delete-report");
+        if (delReport) { deleteReport(delReport.dataset.id); return; }
+      });
+
+      // Toggle sections (ouvrir/fermer)
+      document.querySelectorAll('.admin-section').forEach(section => {
+        const header = section.querySelector('.section-header');
+        const content = section.querySelector('.section-content');
+        if (!header || !content) return;
+        header.addEventListener('click', () => {
+          const isOpen = section.classList.toggle('open');
+          content.style.display = isOpen ? 'block' : 'none';
+        });
+      });
+
+      // Initial load
+      loadPosts();
+      loadProjects();
+      loadResources();
+      loadReports();
+    }); // end DOMContentLoaded
+  </script>
 </body>
 </html>
