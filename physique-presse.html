@@ -114,6 +114,15 @@
         div.innerHTML = `
           <h3>${post.title}</h3>
           <p style="opacity:0.7;font-size:0.9rem;">Publié le ${date}</p>
+
+          ${post.image_url ? `
+            <img 
+              src="${post.image_url}" 
+              alt="${post.title}" 
+              style="width:100%;max-width:600px;border-radius:6px;margin:1rem 0;"
+            >
+          ` : ""}
+
           <p style="margin-top:0.5rem;">${post.content}</p>
 
           <div style="margin-top:1rem; display:flex; gap:1rem;">
@@ -179,15 +188,7 @@
     });
   </script>
 
-    <footer class="site-footer">
-    <p>© FASD — Association</p>
-  </footer>
-
   <script src="main.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    // ton code Supabase ici
-  </script>
 
 </body>
 </html>
