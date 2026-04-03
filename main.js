@@ -1,6 +1,8 @@
 // main.js : tactile, clavier et gestion du focus pour la version à deux images + formulaire(s)
-// + gestion upload d'images pour posts ET projets (Supabase Storage)
-// + conversion HEIC/HEIF → JPG pour mobile
+// + upload images posts & projets (Supabase Storage)
+// + conversion HEIC/HEIF → JPG (fix iPhone)
+// + limite augmentée à 20 Mo
+// + messages d’erreur améliorés
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -93,7 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
         img.src = e.target.result;
       };
       reader.onerror = reject;
-      reader.readAsDataURL(file);
+
+      try {
+        reader.readAsDataURL(file);
+      } catch (e) {
+        reject("Impossible de lire le fichier (trop lourd ou format non supporté)");
+      }
     });
   }
 
@@ -106,9 +113,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!file) return null;
 
-    const MAX_MB = 6;
+    const MAX_MB = 20; // ← FIX iPhone
     if (file.size > MAX_MB * 1024 * 1024) {
-      throw new Error(`Image trop lourde. Max ${MAX_MB} Mo.`);
+      throw new Error(`Image trop lourde (${(file.size/1024/1024).toFixed(1)} Mo). Max ${MAX_MB} Mo.`);
     }
 
     // EXTENSION
@@ -126,6 +133,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const filename = `${folder}/${Date.now()}-${uuid}.${ext}`;
 
     const BUCKET = "images";
+
+    if (!supabaseClient.storage) {
+      throw new Error("Supabase Storage inaccessible (clé invalide ou projet incorrect)");
+    }
 
     const { error: uploadError } = await supabaseClient
       .storage
@@ -320,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  document.addaddEventListener("click", (e) => {
+  document.addEventListener("click", (e) => {
     if (window.innerWidth > 900) return;
     if (!e.target.closest(".nav-menu") && !e.target.closest(".nav-burger")) {
       if (navMenu) navMenu.classList.remove("open");
