@@ -216,9 +216,16 @@
             </div>
 
             <div class="form-block">
-              <label for="projectImage">Image (URL)</label>
-              <input type="url" id="projectImage" />
+              <label for="projectImageFile">Image depuis l'appareil (optionnel)</label>
+              <input type="file" id="projectImageFile" accept="image/*" />
             </div>
+
+            <div class="form-block">
+              <label for="projectImage">Ou URL d'image (optionnel)</label>
+              <input type="url" id="projectImage" placeholder="https://..." />
+            </div>
+
+            <div id="projectPreviewWrap" aria-live="polite"></div>
 
             <div class="form-block">
               <label for="projectLink">Lien externe</label>

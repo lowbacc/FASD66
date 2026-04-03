@@ -158,168 +158,348 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!title) {
         alert('Merci de renseigner un titre.');
         return;
+      }// main.js : tactile, clavier et gestion du focus pour la version à deux images + formulaire(s)
+// + gestion upload d'images pour posts ET projets (Supabase Storage)
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* ---------------------------------------------------------
+     LOGO WRAP (animations tactiles / clavier)
+  --------------------------------------------------------- */
+  const wrap = document.getElementById('logoWrap');
+  if (wrap) {
+    let touched = false;
+    wrap.addEventListener('touchstart', (e) => {
+      if (!touched) {
+        wrap.classList.add('touched');
+        touched = true;
+        e.preventDefault();
+        setTimeout(() => { touched = false; wrap.classList.remove('touched'); }, 4000);
       }
+    }, { passive: false });
+
+    wrap.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        wrap.classList.toggle('touched');
+      }
+      if (e.key === 'Escape') wrap.classList.remove('touched');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!wrap.contains(e.target)) {
+        wrap.classList.remove('touched');
+        touched = false;
+      }
+    });
+
+    const halves = wrap.querySelectorAll('.half');
+    halves.forEach(h => {
+      h.addEventListener('click', (ev) => {
+        if (!wrap.classList.contains('touched')) {
+          ev.preventDefault();
+          wrap.classList.add('touched');
+          setTimeout(() => { wrap.classList.remove('touched'); }, 3000);
+        }
+      });
+    });
+  }
+
+  /* ---------------------------------------------------------
+     FORMULAIRES CONTACT
+  --------------------------------------------------------- */
+  const handleForm = (formId) => {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    const note = form.querySelector('.form-note');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!form.checkValidity()) {
+        if (note) { note.textContent = 'Merci de compléter les champs requis.'; note.style.color = '#f6b0b0'; }
+        return;
+      }
+      if (note) { note.textContent = 'Merci — votre demande a bien été reçue.'; note.style.color = '#bff0d6'; }
+      form.reset();
+    });
+  };
+
+  handleForm('contactForm');
+  handleForm('contactFormPhys');
+
+  /* ---------------------------------------------------------
+     ADMIN — UPLOAD IMAGE POSTS
+  --------------------------------------------------------- */
+  const postForm = document.getElementById('postForm');
+  if (postForm) {
+    const supabaseClient = window.supabaseClient || null;
+
+    const fileInput = document.getElementById('imageFile');
+    const urlInput = document.getElementById('imageUrl');
+    const previewWrap = document.getElementById('previewWrap');
+
+    if (fileInput && previewWrap) {
+      fileInput.addEventListener('change', () => {
+        previewWrap.innerHTML = '';
+        const file = fileInput.files[0];
+        if (!file) return;
+        if (!file.type.startsWith('image/')) {
+          previewWrap.textContent = 'Fichier non image.';
+          return;
+        }
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.style.maxWidth = '240px';
+        img.style.maxHeight = '160px';
+        img.style.borderRadius = '6px';
+        img.onload = () => URL.revokeObjectURL(img.src);
+        previewWrap.appendChild(img);
+      });
+    }
+
+    async function uploadImageAndGetUrl(file, folder = "posts") {
+      if (!file) return null;
+      if (!supabaseClient) throw new Error('Supabase non initialisé.');
+
+      const MAX_MB = 6;
+      if (file.size > MAX_MB * 1024 * 1024) {
+        throw new Error(`Image trop lourde. Max ${MAX_MB} Mo.`);
+      }
+
+      const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const ext = rawExt.replace(/[^a-z0-9]/gi, '') || 'jpg';
+      const uuid = crypto.randomUUID ? crypto.randomUUID() : Date.now() + "-" + Math.random();
+      const filename = `${folder}/${Date.now()}-${uuid}.${ext}`;
+
+      const BUCKET = 'images';
+
+      const { error: uploadError } = await supabaseClient
+        .storage
+        .from(BUCKET)
+        .upload(filename, file, { cacheControl: '3600', upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      const { data: publicData, error: publicError } = supabaseClient
+        .storage
+        .from(BUCKET)
+        .getPublicUrl(filename);
+
+      if (publicError) throw publicError;
+
+      return publicData.publicUrl;
+    }
+
+    postForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const title = (postForm.querySelector('#postTitle') || {}).value?.trim?.() || '';
+      const content = (postForm.querySelector('#postContent') || {}).value?.trim?.() || '';
+      const location = (postForm.querySelector('#postLocation') || {}).value || null;
+      const urlField = urlInput ? urlInput.value.trim() : '';
+      const file = fileInput ? fileInput.files[0] : null;
+
+      if (!title) return alert("Merci de renseigner un titre.");
+      if (!location) return alert("Merci de choisir un emplacement.");
 
       try {
         let imageUrl = null;
 
-        // Priorité : fichier uploadé > URL manuelle
         if (file) {
-          if (!supabaseClient) {
-            alert('Impossible d\'uploader l\'image : Supabase non initialisé. Utilisez une URL ou initialisez le client.');
-            return;
-          }
-          // Indicateur simple (on peut améliorer avec une barre de progression)
-          const submitBtn = postForm.querySelector('button[type="submit"]');
-          const originalText = submitBtn ? submitBtn.textContent : null;
-          if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Upload en cours…'; }
+          const btn = postForm.querySelector('button[type="submit"]');
+          const old = btn.textContent;
+          btn.disabled = true;
+          btn.textContent = "Upload…";
 
-          imageUrl = await uploadImageAndGetUrl(file);
+          imageUrl = await uploadImageAndGetUrl(file, "posts");
 
-          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
+          btn.disabled = false;
+          btn.textContent = old;
         } else if (urlField) {
           imageUrl = urlField;
         }
 
-        // Insérer le post dans Supabase si le client est présent
-        if (!supabaseClient) {
-          // Si pas de client, on simule un enregistrement local (ou on peut envoyer via fetch vers un endpoint)
-          alert('Supabase non initialisé : le post n\'a pas été envoyé. (Test local)');
-          postForm.reset();
-          if (previewWrap) previewWrap.innerHTML = '';
+        const { error } = await supabaseClient
+          .from("posts")
+          .insert({ title, content, image_url: imageUrl, location });
+
+        if (error) throw error;
+
+        postForm.reset();
+        previewWrap.innerHTML = "";
+        loadPosts();
+
+      } catch (err) {
+        console.error(err);
+        alert("Erreur : " + err.message);
+      }
+    });
+  }
+
+  /* ---------------------------------------------------------
+     ADMIN — UPLOAD IMAGE PROJETS
+  --------------------------------------------------------- */
+  const projectForm = document.getElementById("projectForm");
+  if (projectForm) {
+    const supabaseClient = window.supabaseClient || null;
+
+    const projectImageFile = document.getElementById("projectImageFile");
+    const projectImage = document.getElementById("projectImage");
+    const projectPreviewWrap = document.getElementById("projectPreviewWrap");
+
+    if (projectImageFile && projectPreviewWrap) {
+      projectImageFile.addEventListener("change", () => {
+        projectPreviewWrap.innerHTML = "";
+        const file = projectImageFile.files[0];
+        if (!file) return;
+        if (!file.type.startsWith("image/")) {
+          projectPreviewWrap.textContent = "Fichier non image.";
           return;
+        }
+        const img = document.createElement("img");
+        img.src = URL.createObjectURL(file);
+        img.style.maxWidth = "240px";
+        img.style.maxHeight = "160px";
+        img.style.borderRadius = "6px";
+        img.onload = () => URL.revokeObjectURL(img.src);
+        projectPreviewWrap.appendChild(img);
+      });
+    }
+
+    projectForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const file = projectImageFile ? projectImageFile.files[0] : null;
+      const urlField = projectImage ? projectImage.value.trim() : "";
+      let imageUrl = null;
+
+      try {
+        if (file) {
+          const btn = projectForm.querySelector('button[type="submit"]');
+          const old = btn.textContent;
+          btn.disabled = true;
+          btn.textContent = "Upload…";
+
+          imageUrl = await uploadImageAndGetUrl(file, "projects");
+
+          btn.disabled = false;
+          btn.textContent = old;
+        } else if (urlField) {
+          imageUrl = urlField;
         }
 
         const { error } = await supabaseClient
-          .from('posts')
+          .from("projects")
           .insert({
-            title,
-            content,
-            image_url: imageUrl,
-            // adapter la colonne location selon ton usage ; ici on laisse vide ou on peut ajouter un champ select
-            location: postForm.dataset.location || null
+            title: projectTitle.value,
+            status: projectStatus.value,
+            start_date: projectStart.value,
+            end_date: projectEnd.value || null,
+            image: imageUrl,
+            link: projectLink.value || null,
+            description: projectDescription.value
           });
 
         if (error) throw error;
 
-        alert('Post publié.');
-        postForm.reset();
-        if (previewWrap) previewWrap.innerHTML = '';
+        projectForm.reset();
+        if (projectPreviewWrap) projectPreviewWrap.innerHTML = "";
+        loadProjects();
+
       } catch (err) {
         console.error(err);
-        alert('Erreur : ' + (err.message || JSON.stringify(err)));
+        alert("Erreur upload : " + err.message);
       }
-    });
-  } // fin bloc postForm
-}); // fin DOMContentLoaded
-
-/* ---------------------------------------------------------
-   MENU BURGER (MOBILE)
---------------------------------------------------------- */
-
-const burger = document.querySelector(".nav-burger");
-const navMenu = document.querySelector(".nav-menu");
-
-if (burger) {
-  burger.addEventListener("click", () => {
-    if (navMenu) navMenu.classList.toggle("open");
-  });
-}
-
-/* ---------------------------------------------------------
-   SOUS-MENUS SUR MOBILE (clic)
---------------------------------------------------------- */
-
-const submenuToggles = document.querySelectorAll(".submenu-toggle");
-
-submenuToggles.forEach(toggle => {
-  toggle.addEventListener("click", (e) => {
-    // Seulement sur mobile
-    if (window.innerWidth <= 900) {
-      const parent = toggle.parentElement;
-      const submenu = parent.querySelector(".submenu");
-      if (submenu) submenu.classList.toggle("open");
-    }
-  });
-});
-
-/* ---------------------------------------------------------
-   FERMETURE DU MENU SI ON CLIQUE AILLEURS (mobile)
---------------------------------------------------------- */
-
-document.addEventListener("click", (e) => {
-  if (window.innerWidth > 900) return; // seulement mobile
-
-  if (!e.target.closest(".nav-menu") && !e.target.closest(".nav-burger")) {
-    if (navMenu) navMenu.classList.remove("open");
-
-    // fermer tous les sous-menus
-    document.querySelectorAll(".submenu.open").forEach(sm => {
-      sm.classList.remove("open");
     });
   }
-});
 
-/* ---------------------------------------------------------
-   PAGE CONTACT — DROPDOWN STYLÉ (Option D2)
---------------------------------------------------------- */
+  /* ---------------------------------------------------------
+     MENU BURGER
+  --------------------------------------------------------- */
+  const burger = document.querySelector(".nav-burger");
+  const navMenu = document.querySelector(".nav-menu");
 
-const dropdownBtn = document.querySelector(".dropdown-btn");
-const dropdownMenu = document.querySelector(".dropdown-menu");
+  if (burger) {
+    burger.addEventListener("click", () => {
+      if (navMenu) navMenu.classList.toggle("open");
+    });
+  }
 
-if (dropdownBtn && dropdownMenu) {
-  dropdownBtn.addEventListener("click", () => {
-    dropdownMenu.classList.toggle("open");
-  });
+  /* ---------------------------------------------------------
+     SOUS-MENUS MOBILE
+  --------------------------------------------------------- */
+  const submenuToggles = document.querySelectorAll(".submenu-toggle");
 
-  // Fermer si clic ailleurs
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".contact-dropdown")) {
-      dropdownMenu.classList.remove("open");
-    }
-  });
-}
-
-/* ---------------------------------------------------------
-   PAGE CONTACT — AFFICHAGE DES FORMULAIRES
---------------------------------------------------------- */
-
-const formPhys = document.querySelector(".contact-form-phys");
-const formIntel = document.querySelector(".contact-form-intel");
-
-if (dropdownMenu) {
-  dropdownMenu.querySelectorAll("button").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const choice = btn.dataset.branch;
-
-      dropdownBtn.textContent = btn.textContent; // mettre le texte choisi
-
-      dropdownMenu.classList.remove("open");
-
-      if (choice === "physique") {
-        if (formPhys) formPhys.style.display = "block";
-        if (formIntel) formIntel.style.display = "none";
-      } else if (choice === "intellectuelle") {
-        if (formPhys) formPhys.style.display = "none";
-        if (formIntel) formIntel.style.display = "block";
+  submenuToggles.forEach(toggle => {
+    toggle.addEventListener("click", (e) => {
+      if (window.innerWidth <= 900) {
+        const parent = toggle.parentElement;
+        const submenu = parent.querySelector(".submenu");
+        if (submenu) submenu.classList.toggle("open");
       }
     });
   });
-}
 
-/* ---------------------------------------------------------
-   ANCRE AUTOMATIQUE (#physique / #intellectuelle)
-   Quand on arrive depuis le menu
---------------------------------------------------------- */
+  document.addEventListener("click", (e) => {
+    if (window.innerWidth > 900) return;
+    if (!e.target.closest(".nav-menu") && !e.target.closest(".nav-burger")) {
+      if (navMenu) navMenu.classList.remove("open");
+      document.querySelectorAll(".submenu.open").forEach(sm => sm.classList.remove("open"));
+    }
+  });
 
-if (window.location.hash === "#physique" && formPhys) {
-  formPhys.style.display = "block";
-  if (formIntel) formIntel.style.display = "none";
-  if (dropdownBtn) dropdownBtn.textContent = "Défense Physique";
-}
+  /* ---------------------------------------------------------
+     CONTACT — DROPDOWN
+  --------------------------------------------------------- */
+  const dropdownBtn = document.querySelector(".dropdown-btn");
+  const dropdownMenu = document.querySelector(".dropdown-menu");
 
-if (window.location.hash === "#intellectuelle" && formIntel) {
-  formIntel.style.display = "block";
-  if (formPhys) formPhys.style.display = "none";
-  if (dropdownBtn) dropdownBtn.textContent = "Défense Intellectuelle";
-}
+  if (dropdownBtn && dropdownMenu) {
+    dropdownBtn.addEventListener("click", () => {
+      dropdownMenu.classList.toggle("open");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".contact-dropdown")) {
+        dropdownMenu.classList.remove("open");
+      }
+    });
+  }
+
+  /* ---------------------------------------------------------
+     CONTACT — AFFICHAGE FORMULAIRES
+  --------------------------------------------------------- */
+  const formPhys = document.querySelector(".contact-form-phys");
+  const formIntel = document.querySelector(".contact-form-intel");
+
+  if (dropdownMenu) {
+    dropdownMenu.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const choice = btn.dataset.branch;
+
+        dropdownBtn.textContent = btn.textContent;
+        dropdownMenu.classList.remove("open");
+
+        if (choice === "physique") {
+          if (formPhys) formPhys.style.display = "block";
+          if (formIntel) formIntel.style.display = "none";
+        } else if (choice === "intellectuelle") {
+          if (formPhys) formPhys.style.display = "none";
+          if (formIntel) formIntel.style.display = "block";
+        }
+      });
+    });
+  }
+
+  if (window.location.hash === "#physique" && formPhys) {
+    formPhys.style.display = "block";
+    if (formIntel) formIntel.style.display = "none";
+    if (dropdownBtn) dropdownBtn.textContent = "Défense Physique";
+  }
+
+  if (window.location.hash === "#intellectuelle" && formIntel) {
+    formIntel.style.display = "block";
+    if (formPhys) formPhys.style.display = "none";
+    if (dropdownBtn) dropdownBtn.textContent = "Défense Intellectuelle";
+  }
+
+}); // FIN DOMContentLoaded
