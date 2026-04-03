@@ -14,7 +14,6 @@
       margin: 1.5rem 0;
       border: 1px solid #333;
     }
-
     .section-header {
       display: flex;
       justify-content: space-between;
@@ -23,107 +22,40 @@
       user-select: none;
       padding: 0.3rem 0;
     }
-
-    .section-header h2 {
-      margin: 0;
-      font-size: 1.2rem;
-    }
-
-    .toggle-icon {
-      font-size: 1.4rem;
-      opacity: 0.7;
-      transition: transform 0.2s ease;
-    }
-
-    .open .toggle-icon {
-      transform: rotate(90deg);
-    }
-
-    .section-content {
-      display: none;
-      margin-top: 1rem;
-      animation: fadeIn 0.25s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .form-block {
-      margin-bottom: 1rem;
-    }
-
+    .section-header h2 { margin: 0; font-size: 1.2rem; }
+    .toggle-icon { font-size: 1.4rem; opacity: 0.7; transition: transform 0.2s ease; }
+    .admin-section.open .toggle-icon { transform: rotate(90deg); }
+    .section-content { display: none; margin-top: 1rem; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .form-block { margin-bottom: 1rem; }
     input, textarea, select {
-      width: 100%;
-      padding: 0.6rem;
-      border-radius: 6px;
-      border: 1px solid #444;
-      background: #111;
-      color: white;
-      font-size: 1rem;
+      width: 100%; padding: 0.6rem; border-radius: 6px;
+      border: 1px solid #444; background: #111; color: white; font-size: 1rem;
     }
-
-    textarea {
-      resize: vertical;
-    }
-
+    textarea { resize: vertical; }
     .admin-card {
-      background: #222;
-      padding: 1rem;
-      border-radius: 6px;
-      margin: 1rem 0;
-      border: 1px solid #333;
+      background: #222; padding: 1rem; border-radius: 6px;
+      margin: 1rem 0; border: 1px solid #333;
     }
-
     .btn {
-      padding: 0.6rem 1rem;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      background: #444;
-      color: white;
-      font-size: 1rem;
+      padding: 0.6rem 1rem; border-radius: 6px; border: none;
+      cursor: pointer; background: #444; color: white; font-size: 1rem;
     }
-
-    .btn.primary {
-      background: #0055ff;
+    .btn.primary { background: #0055ff; }
+    .btn:hover { opacity: 0.85; }
+    #previewWrap img, #projectPreviewWrap img {
+      display:block; max-width:320px; border-radius:6px; margin-top:8px;
     }
-
-    .btn:hover {
-      opacity: 0.85;
-    }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 1.6rem;
-      }
-
-      .admin-section {
-        padding: 1rem;
-      }
-
-      .section-header h2 {
-        font-size: 1.1rem;
-      }
-
-      .btn {
-        width: 100%;
-        margin-top: 0.5rem;
-      }
-    }
-
-    /* preview image small */
-    #previewWrap img { display:block; max-width:320px; border-radius:6px; margin-top:8px; }
   </style>
 </head>
+
 <body>
 
   <main class="page-main">
     <div class="page-content" style="max-width:900px;margin:auto;">
 
       <h1>Espace Administrateur</h1>
-      <p>Gérez facilement les contenus de l’association.</p>
+      <p>Gérez les contenus de l’association : actualités, projets, ressources et signalements.</p>
 
       <button id="logoutBtn" class="btn primary" style="margin-bottom:2rem;">Déconnexion</button>
 
@@ -135,8 +67,7 @@
         </div>
 
         <div class="section-content">
-          <!-- Formulaire de post (titre, contenu, emplacement, image upload ou URL) -->
-          <form id="postForm" data-location="">
+          <form id="postForm">
             <div class="form-block">
               <label for="postTitle">Titre du post</label>
               <input type="text" id="postTitle" required />
@@ -155,7 +86,6 @@
                 <option value="intellectuelle-actu">Actualités Défense Intellectuelle</option>
                 <option value="physique-presse">Presse Défense Physique</option>
                 <option value="intellectuelle-presse">Presse Défense Intellectuelle</option>
-                <option value="accueil">Page d’accueil</option>
               </select>
             </div>
 
@@ -173,7 +103,7 @@
 
             <div id="previewWrap" aria-live="polite"></div>
 
-            <button type="submit" class="btn primary" style="margin-top:12px;">Publier</button>
+            <button type="submit" class="btn primary">Publier</button>
           </form>
 
           <h3 style="margin-top:2rem;">Posts existants</h3>
@@ -313,63 +243,54 @@
     <p>© FASD — Association</p>
   </footer>
 
-  <!-- Supabase client : initialisation (valeurs fournies) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // Initialisation Supabase (valeurs fournies)
+    /* =========================================================
+       INIT SUPABASE
+    ======================================================== */
     const supabaseClient = supabase.createClient(
       "https://vanhcaicgzvavoqcnvbm.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbmhjYWljZ3p2YXZvcWNudmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNDgwNTQsImV4cCI6MjA4NDgyNDA1NH0.PG_hpNFzZH9zGAVngpgKYUnS8_9LO7PHY72ilGojAXU"
     );
 
-    // Exposer globalement pour les autres scripts
-    window.supabaseClient = supabaseClient;
-  </script>
+    const BUCKET = "images";
 
-  <!-- Script principal consolidé -->
-  <script>
     /* =========================================================
-       UTIL HELPERS
+       HELPERS
     ======================================================== */
-    const BUCKET = 'images';
-
     function escapeHtml(str) {
-      if (!str && str !== 0) return '';
+      if (!str && str !== 0) return "";
       return String(str)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-    }
-
-    function escapeAttr(str) {
-      if (!str && str !== 0) return '';
-      return String(str).replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
     }
 
     async function uploadImageAndGetUrl(file) {
       if (!file) return null;
-      if (!window.supabaseClient) throw new Error('Supabase client non initialisé.');
 
       const MAX_MB = 6;
       if (file.size > MAX_MB * 1024 * 1024) {
         throw new Error(`Image trop lourde. Max ${MAX_MB} Mo.`);
       }
 
-      const rawExt = (file.name.split('.').pop() || 'jpg').toLowerCase();
-      const ext = rawExt.replace(/[^a-z0-9]/gi, '') || 'jpg';
-      const uuid = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + '-' + Math.floor(Math.random() * 1e6);
-      const filename = `posts/${Date.now()}-${uuid}.${ext}`;
+      const rawExt = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const ext = rawExt.replace(/[^a-z0-9]/gi, "") || "jpg";
+      const uuid = (typeof crypto !== "undefined" && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : String(Date.now()) + "-" + Math.floor(Math.random() * 1e6);
+      const filename = `uploads/${Date.now()}-${uuid}.${ext}`;
 
-      const { data: uploadData, error: uploadError } = await window.supabaseClient
+      const { error: uploadError } = await supabaseClient
         .storage
         .from(BUCKET)
-        .upload(filename, file, { cacheControl: '3600', upsert: false });
+        .upload(filename, file, { cacheControl: "3600", upsert: false });
 
       if (uploadError) throw uploadError;
 
-      const { data: publicData, error: publicError } = window.supabaseClient
+      const { data: publicData, error: publicError } = supabaseClient
         .storage
         .from(BUCKET)
         .getPublicUrl(filename);
@@ -383,14 +304,13 @@
        AUTH LOCALE & LOGOUT
     ======================================================== */
     if (localStorage.getItem("adminLoggedIn") !== "true") {
-      // redirection immédiate si non connecté
       window.location.href = "admin-login.html";
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener("DOMContentLoaded", () => {
       const logoutBtn = document.getElementById("logoutBtn");
       if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
+        logoutBtn.addEventListener("click", () => {
           localStorage.removeItem("adminLoggedIn");
           window.location.href = "admin-login.html";
         });
@@ -398,13 +318,13 @@
     });
 
     /* =========================================================
-       POSTS
+       LOAD POSTS
     ======================================================== */
     async function loadPosts() {
       const postsList = document.getElementById("postsList");
       if (!postsList) return;
 
-      const { data, error } = await window.supabaseClient
+      const { data, error } = await supabaseClient
         .from("posts")
         .select("*")
         .order("created_at", { ascending: false });
@@ -423,9 +343,9 @@
 
         div.innerHTML = `
           <h3>${escapeHtml(post.title)}</h3>
-          <p><strong>Emplacement :</strong> ${escapeHtml(post.location || '')}</p>
-          ${post.image_url ? `<p><img src="${escapeAttr(post.image_url)}" alt="" style="max-width:200px;border-radius:6px;margin:8px 0;"></p>` : ''}
-          <p>${escapeHtml(post.content || '')}</p>
+          <p><strong>Emplacement :</strong> ${escapeHtml(post.location || "")}</p>
+          ${post.image_url ? `<p><img src="${post.image_url}" alt="" style="max-width:200px;border-radius:6px;margin:8px 0;"></p>` : ""}
+          <p>${escapeHtml(post.content || "")}</p>
           <div style="display:flex;gap:8px;margin-top:8px;">
             <button class="btn delete-post" data-id="${post.id}">Supprimer</button>
           </div>
@@ -433,16 +353,12 @@
 
         postsList.appendChild(div);
       });
-
-      document.querySelectorAll(".delete-post").forEach(btn => {
-        btn.onclick = () => deletePost(btn.dataset.id);
-      });
     }
 
     async function deletePost(id) {
       if (!confirm("Confirmer la suppression du post ?")) return;
 
-      const { error } = await window.supabaseClient
+      const { error } = await supabaseClient
         .from("posts")
         .delete()
         .eq("id", id);
@@ -456,13 +372,13 @@
     }
 
     /* =========================================================
-       PROJECTS
+       LOAD PROJECTS
     ======================================================== */
     async function loadProjects() {
       const projectsList = document.getElementById("projectsList");
       if (!projectsList) return;
 
-      const { data, error } = await window.supabaseClient
+      const { data, error } = await supabaseClient
         .from("projects")
         .select("*")
         .order("created_at", { ascending: false });
@@ -481,10 +397,11 @@
 
         div.innerHTML = `
           <h3>${escapeHtml(p.title)}</h3>
-          <p><strong>Statut :</strong> ${escapeHtml(p.status || '')}</p>
-          <p><strong>Dates :</strong> ${escapeHtml(p.start_date || '')} → ${escapeHtml(p.end_date || 'En cours')}</p>
-          ${p.link ? `<p><a href="${escapeAttr(p.link)}" target="_blank" rel="noopener">Lien externe</a></p>` : ""}
-          <p>${escapeHtml(p.description || '')}</p>
+          <p><strong>Statut :</strong> ${escapeHtml(p.status || "")}</p>
+          <p><strong>Dates :</strong> ${escapeHtml(p.start_date || "")} → ${escapeHtml(p.end_date || "En cours")}</p>
+          ${p.image ? `<p><img src="${p.image}" alt="" style="max-width:200px;border-radius:6px;margin:8px 0;"></p>` : ""}
+          <p>${escapeHtml(p.description || "")}</p>
+          ${p.link ? `<p><a href="${p.link}" target="_blank" rel="noopener">Lien externe</a></p>` : ""}
           <div style="display:flex;gap:8px;margin-top:8px;">
             <button class="btn delete-project" data-id="${p.id}">Supprimer</button>
           </div>
@@ -492,16 +409,12 @@
 
         projectsList.appendChild(div);
       });
-
-      document.querySelectorAll(".delete-project").forEach(btn => {
-        btn.onclick = () => deleteProject(btn.dataset.id);
-      });
     }
 
     async function deleteProject(id) {
       if (!confirm("Confirmer la suppression du projet ?")) return;
 
-      const { error } = await window.supabaseClient
+      const { error } = await supabaseClient
         .from("projects")
         .delete()
         .eq("id", id);
@@ -515,13 +428,13 @@
     }
 
     /* =========================================================
-       RESOURCES
+       LOAD RESOURCES
     ======================================================== */
     async function loadResources() {
       const resourcesList = document.getElementById("resourcesList");
       if (!resourcesList) return;
 
-      const { data, error } = await window.supabaseClient
+      const { data, error } = await supabaseClient
         .from("resources")
         .select("*")
         .order("created_at", { ascending: false });
@@ -540,9 +453,9 @@
 
         div.innerHTML = `
           <h3>${escapeHtml(r.title)}</h3>
-          <p><strong>Type :</strong> ${escapeHtml(r.type || '')} ${r.category ? `• <strong>Catégorie :</strong> ${escapeHtml(r.category)}` : ''}</p>
-          <p><a href="${escapeAttr(r.link)}" target="_blank" rel="noopener">Ouvrir le lien</a></p>
-          <p>${escapeHtml(r.description || '')}</p>
+          <p><strong>Type :</strong> ${escapeHtml(r.type || "")} ${r.category ? `• <strong>Catégorie :</strong> ${escapeHtml(r.category)}` : ""}</p>
+          <p><a href="${r.link}" target="_blank" rel="noopener">Ouvrir le lien</a></p>
+          <p>${escapeHtml(r.description || "")}</p>
           <div style="display:flex;gap:8px;margin-top:8px;">
             <button class="btn delete-resource" data-id="${r.id}">Supprimer</button>
           </div>
@@ -550,16 +463,12 @@
 
         resourcesList.appendChild(div);
       });
-
-      document.querySelectorAll(".delete-resource").forEach(btn => {
-        btn.onclick = () => deleteResource(btn.dataset.id);
-      });
     }
 
     async function deleteResource(id) {
       if (!confirm("Confirmer la suppression de la ressource ?")) return;
 
-      const { error } = await window.supabaseClient
+      const { error } = await supabaseClient
         .from("resources")
         .delete()
         .eq("id", id);
@@ -573,13 +482,13 @@
     }
 
     /* =========================================================
-       REPORTS
+       LOAD REPORTS
     ======================================================== */
     async function loadReports() {
       const reportsList = document.getElementById("reportsList");
       if (!reportsList) return;
 
-      const { data, error } = await window.supabaseClient
+      const { data, error } = await supabaseClient
         .from("reports")
         .select("*")
         .order("created_at", { ascending: false });
@@ -599,8 +508,8 @@
         const date = rep.created_at ? new Date(rep.created_at).toLocaleDateString("fr-FR") : "";
 
         div.innerHTML = `
-          <h3>${escapeHtml(rep.post_title || 'Signalement')}</h3>
-          <p>${escapeHtml(rep.message || '')}</p>
+          <h3>${escapeHtml(rep.post_title || "Signalement")}</h3>
+          <p>${escapeHtml(rep.message || "")}</p>
           <p style="opacity:0.7;">${date}</p>
           <div style="display:flex;gap:8px;margin-top:8px;">
             <button class="btn delete-report" data-id="${rep.id}">Supprimer</button>
@@ -609,16 +518,12 @@
 
         reportsList.appendChild(div);
       });
-
-      document.querySelectorAll(".delete-report").forEach(btn => {
-        btn.onclick = () => deleteReport(btn.dataset.id);
-      });
     }
 
     async function deleteReport(id) {
       if (!confirm("Confirmer la suppression du signalement ?")) return;
 
-      const { error } = await window.supabaseClient
+      const { error } = await supabaseClient
         .from("reports")
         .delete()
         .eq("id", id);
@@ -630,12 +535,11 @@
 
       loadReports();
     }
-
     /* =========================================================
-       FORM SUBMISSIONS (delegation)
+       FORM SUBMISSIONS
     ======================================================== */
-    document.addEventListener('DOMContentLoaded', () => {
-      // POSTS form
+    document.addEventListener("DOMContentLoaded", () => {
+      /* POSTS form */
       const postForm = document.getElementById("postForm");
       if (postForm) {
         const postTitle = document.getElementById("postTitle");
@@ -646,19 +550,19 @@
         const previewWrap = document.getElementById("previewWrap");
 
         if (fileInput && previewWrap) {
-          fileInput.addEventListener('change', () => {
-            previewWrap.innerHTML = '';
+          fileInput.addEventListener("change", () => {
+            previewWrap.innerHTML = "";
             const file = fileInput.files[0];
             if (!file) return;
-            if (!file.type.startsWith('image/')) {
-              previewWrap.textContent = 'Fichier non image.';
+            if (!file.type.startsWith("image/")) {
+              previewWrap.textContent = "Fichier non image.";
               return;
             }
-            const img = document.createElement('img');
+            const img = document.createElement("img");
             img.src = URL.createObjectURL(file);
-            img.style.maxWidth = '320px';
-            img.style.maxHeight = '240px';
-            img.style.borderRadius = '6px';
+            img.style.maxWidth = "320px";
+            img.style.maxHeight = "240px";
+            img.style.borderRadius = "6px";
             img.onload = () => URL.revokeObjectURL(img.src);
             previewWrap.appendChild(img);
           });
@@ -667,14 +571,14 @@
         postForm.onsubmit = async (e) => {
           e.preventDefault();
 
-          const title = postTitle ? postTitle.value.trim() : '';
-          const content = postContent ? postContent.value.trim() : '';
-          const location = postLocation ? postLocation.value : (postForm.dataset.location || '');
-          const urlField = urlInput ? urlInput.value.trim() : '';
+          const title = postTitle ? postTitle.value.trim() : "";
+          const content = postContent ? postContent.value.trim() : "";
+          const location = postLocation ? postLocation.value : "";
+          const urlField = urlInput ? urlInput.value.trim() : "";
           const file = fileInput ? fileInput.files[0] : null;
 
-          if (!title) { alert('Merci de renseigner un titre.'); return; }
-          if (!location) { alert('Merci de choisir une destination de publication.'); return; }
+          if (!title) { alert("Merci de renseigner un titre."); return; }
+          if (!location) { alert("Merci de choisir une destination de publication."); return; }
 
           try {
             let imageUrl = null;
@@ -682,7 +586,7 @@
             if (file) {
               const submitBtn = postForm.querySelector('button[type="submit"]');
               const originalText = submitBtn ? submitBtn.textContent : null;
-              if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Upload en cours…'; }
+              if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Upload en cours…"; }
 
               imageUrl = await uploadImageAndGetUrl(file);
 
@@ -691,7 +595,7 @@
               imageUrl = urlField;
             }
 
-            const { error } = await window.supabaseClient
+            const { error } = await supabaseClient
               .from("posts")
               .insert({
                 title,
@@ -706,37 +610,80 @@
             }
 
             postForm.reset();
-            if (previewWrap) previewWrap.innerHTML = '';
+            if (previewWrap) previewWrap.innerHTML = "";
             loadPosts();
           } catch (err) {
             console.error(err);
-            alert('Erreur : ' + (err.message || JSON.stringify(err)));
+            alert("Erreur : " + (err.message || JSON.stringify(err)));
           }
         };
       }
 
-      // PROJECTS form
+      /* PROJECTS form */
       const projectForm = document.getElementById("projectForm");
       if (projectForm) {
         const projectTitle = document.getElementById("projectTitle");
         const projectStatus = document.getElementById("projectStatus");
         const projectStart = document.getElementById("projectStart");
         const projectEnd = document.getElementById("projectEnd");
-        const projectImage = document.getElementById("projectImage");
+        const projectImageFile = document.getElementById("projectImageFile");
+        const projectImageUrl = document.getElementById("projectImage");
         const projectLink = document.getElementById("projectLink");
         const projectDescription = document.getElementById("projectDescription");
+        const projectPreviewWrap = document.getElementById("projectPreviewWrap");
+
+        if (projectImageFile && projectPreviewWrap) {
+          projectImageFile.addEventListener("change", () => {
+            projectPreviewWrap.innerHTML = "";
+            const file = projectImageFile.files[0];
+            if (!file) return;
+            if (!file.type.startsWith("image/")) {
+              projectPreviewWrap.textContent = "Fichier non image.";
+              return;
+            }
+            const img = document.createElement("img");
+            img.src = URL.createObjectURL(file);
+            img.style.maxWidth = "320px";
+            img.style.maxHeight = "240px";
+            img.style.borderRadius = "6px";
+            img.onload = () => URL.revokeObjectURL(img.src);
+            projectPreviewWrap.appendChild(img);
+          });
+        }
 
         projectForm.onsubmit = async (e) => {
           e.preventDefault();
 
-          const { error } = await window.supabaseClient
+          let finalImageUrl = null;
+
+          const file = projectImageFile ? projectImageFile.files[0] : null;
+          if (file) {
+            try {
+              const submitBtn = projectForm.querySelector('button[type="submit"]');
+              const originalText = submitBtn ? submitBtn.textContent : null;
+              if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Upload en cours…"; }
+
+              finalImageUrl = await uploadImageAndGetUrl(file);
+
+              if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = originalText; }
+            } catch (err) {
+              alert("Erreur upload image : " + err.message);
+              return;
+            }
+          }
+
+          if (!finalImageUrl && projectImageUrl && projectImageUrl.value.trim() !== "") {
+            finalImageUrl = projectImageUrl.value.trim();
+          }
+
+          const { error } = await supabaseClient
             .from("projects")
             .insert({
               title: projectTitle.value,
               status: projectStatus.value,
               start_date: projectStart.value,
               end_date: projectEnd.value || null,
-              image: projectImage.value || null,
+              image: finalImageUrl,
               link: projectLink.value || null,
               description: projectDescription.value
             });
@@ -747,11 +694,12 @@
           }
 
           projectForm.reset();
+          if (projectPreviewWrap) projectPreviewWrap.innerHTML = "";
           loadProjects();
         };
       }
 
-      // RESOURCES form
+      /* RESOURCES form */
       const resourceForm = document.getElementById("resourceForm");
       if (resourceForm) {
         const resourceTitle = document.getElementById("resourceTitle");
@@ -763,7 +711,7 @@
         resourceForm.onsubmit = async (e) => {
           e.preventDefault();
 
-          const { error } = await window.supabaseClient
+          const { error } = await supabaseClient
             .from("resources")
             .insert({
               title: resourceTitle.value,
@@ -783,7 +731,7 @@
         };
       }
 
-      // Delegation for delete buttons (safety if elements are dynamic)
+      /* Delegation delete buttons */
       document.addEventListener("click", (e) => {
         const delPost = e.target.closest(".delete-post");
         if (delPost) { deletePost(delPost.dataset.id); return; }
@@ -798,23 +746,24 @@
         if (delReport) { deleteReport(delReport.dataset.id); return; }
       });
 
-      // Toggle sections (ouvrir/fermer)
-      document.querySelectorAll('.admin-section').forEach(section => {
-        const header = section.querySelector('.section-header');
-        const content = section.querySelector('.section-content');
+      /* Toggle sections */
+      document.querySelectorAll(".admin-section").forEach(section => {
+        const header = section.querySelector(".section-header");
+        const content = section.querySelector(".section-content");
         if (!header || !content) return;
-        header.addEventListener('click', () => {
-          const isOpen = section.classList.toggle('open');
-          content.style.display = isOpen ? 'block' : 'none';
+        header.addEventListener("click", () => {
+          const isOpen = section.classList.toggle("open");
+          content.style.display = isOpen ? "block" : "none";
         });
       });
 
-      // Initial load
+      /* Initial load */
       loadPosts();
       loadProjects();
       loadResources();
       loadReports();
-    }); // end DOMContentLoaded
+    });
   </script>
+
 </body>
 </html>
