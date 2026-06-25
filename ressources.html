@@ -95,6 +95,23 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbmhjYWljZ3p2YXZvcWNudmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNDgwNTQsImV4cCI6MjA4NDgyNDA1NH0.PG_hpNFzZH9zGAVngpgKYUnS8_9LO7PHY72ilGojAXU"
     );
 
+    function escapeHtml(str) {
+      if (!str && str !== 0) return "";
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function sanitizeUrl(url) {
+      const value = String(url || "").trim();
+      if (!value) return "";
+      if (/^https?:\/\//i.test(value) || value.startsWith("/")) return value;
+      return "";
+    }
+
     let allResources = [];
 
     async function loadResources() {
@@ -135,23 +152,25 @@
         div.style.borderRadius = "8px";
 
         div.innerHTML = `
-          <h3>${r.title}</h3>
+          <h3>${escapeHtml(r.title || "")}</h3>
 
           <p style="opacity:0.8;margin:0.3rem 0;">
-            <strong>Type :</strong> ${r.type}
+            <strong>Type :</strong> ${escapeHtml(r.type || "")}
           </p>
 
           ${r.category ? `
             <p style="opacity:0.8;margin:0.3rem 0;">
-              <strong>Catégorie :</strong> ${r.category}
+              <strong>Catégorie :</strong> ${escapeHtml(r.category)}
             </p>
           ` : ""}
 
-          <p style="margin-top:0.8rem;">${r.description}</p>
+          <p style="margin-top:0.8rem;">${escapeHtml(r.description || "")}</p>
 
+          ${sanitizeUrl(r.link) ? `
           <p style="margin-top:1rem;">
-            <a href="${r.link}" target="_blank" class="btn">Ouvrir</a>
+            <a href="${escapeHtml(sanitizeUrl(r.link))}" target="_blank" rel="noopener noreferrer" class="btn">Ouvrir</a>
           </p>
+          ` : ""}
         `;
 
         container.appendChild(div);

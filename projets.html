@@ -84,6 +84,23 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbmhjYWljZ3p2YXZvcWNudmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNDgwNTQsImV4cCI6MjA4NDgyNDA1NH0.PG_hpNFzZH9zGAVngpgKYUnS8_9LO7PHY72ilGojAXU"
     );
 
+    function escapeHtml(str) {
+      if (!str && str !== 0) return "";
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function sanitizeUrl(url) {
+      const value = String(url || "").trim();
+      if (!value) return "";
+      if (/^https?:\/\//i.test(value) || value.startsWith("/")) return value;
+      return "";
+    }
+
     async function loadProjects() {
       const { data, error } = await supabaseClient
         .from("projects")
@@ -105,30 +122,30 @@
         div.style.borderRadius = "8px";
 
         div.innerHTML = `
-          ${project.image ? `
+          ${sanitizeUrl(project.image) ? `
             <img 
-              src="${project.image}" 
-              alt="${project.title}" 
+              src="${escapeHtml(sanitizeUrl(project.image))}" 
+              alt="${escapeHtml(project.title || "")}" 
               style="width:100%;max-height:300px;object-fit:cover;border-radius:6px;margin-bottom:1rem;"
             >
           ` : ""}
 
-          <h3>${project.title}</h3>
+          <h3>${escapeHtml(project.title || "")}</h3>
 
           <p style="opacity:0.8;margin:0.3rem 0;">
-            <strong>Statut :</strong> ${project.status}
+            <strong>Statut :</strong> ${escapeHtml(project.status || "")}
           </p>
 
           <p style="opacity:0.8;margin:0.3rem 0;">
             <strong>Dates :</strong> 
-            ${project.start_date || "?"} → ${project.end_date || "En cours"}
+            ${escapeHtml(project.start_date || "?")} → ${escapeHtml(project.end_date || "En cours")}
           </p>
 
-          <p style="margin-top:0.8rem;">${project.description}</p>
+          <p style="margin-top:0.8rem;">${escapeHtml(project.description || "")}</p>
 
-          ${project.link ? `
+          ${sanitizeUrl(project.link) ? `
             <p style="margin-top:1rem;">
-              <a href="${project.link}" target="_blank" class="btn">En savoir plus</a>
+              <a href="${escapeHtml(sanitizeUrl(project.link))}" target="_blank" rel="noopener noreferrer" class="btn">En savoir plus</a>
             </p>
           ` : ""}
         `;

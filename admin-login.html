@@ -34,28 +34,34 @@
     </div>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // Identifiants admin (à personnaliser)
-    const ADMIN_EMAIL = "admin@fasd.fr";
-    const ADMIN_PASSWORD = "admin123"; // tu pourras changer ça
+    // Supabase Auth (sécurisé côté serveur)
+    const supabaseClient = supabase.createClient(
+      "https://vanhcaicgzvavoqcnvbm.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbmhjYWljZ3p2YXZvcWNudmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNDgwNTQsImV4cCI6MjA4NDgyNDA1NH0.PG_hpNFzZH9zGAVngpgKYUnS8_9LO7PHY72ilGojAXU"
+    );
 
     const form = document.getElementById("adminLoginForm");
     const error = document.getElementById("loginError");
 
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       const email = document.getElementById("adminEmail").value;
       const password = document.getElementById("adminPassword").value;
 
-      if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        // On stocke une "session" dans le navigateur
-        localStorage.setItem("adminLoggedIn", "true");
+      const { data, error: signInError } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
 
-        // Redirection vers le tableau de bord
-        window.location.href = "admin-dashboard.html";
-      } else {
+      if (signInError) {
+        console.error("Erreur auth:", signInError);
         error.style.display = "block";
+      } else if (data.user) {
+        // Session établie
+        window.location.href = "admin-dashboard.html";
       }
     });
   </script>

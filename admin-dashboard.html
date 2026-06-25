@@ -277,6 +277,16 @@
         .replaceAll("'", "&#39;");
     }
 
+    function sanitizeUrl(url, { allowRelative = false } = {}) {
+      if (!url && url !== 0) return "";
+      const value = String(url).trim();
+      if (!value) return "";
+      if (allowRelative && value.startsWith("/")) return value;
+      if (/^https?:\/\//i.test(value)) return value;
+      if (/^www\./i.test(value)) return `https://${value}`;
+      return "";
+    }
+
     function renderTextWithLinks(text) {
       const value = String(text ?? "");
       const urlRegex = /(?:https?:\/\/|www\.)[^\s<]+/gi;
@@ -397,15 +407,23 @@
     /* =========================================================
        AUTH LOCALE & LOGOUT
     ======================================================== */
-    if (localStorage.getItem("adminLoggedIn") !== "true") {
-      window.location.href = "admin-login.html";
+    /* =========================================================
+       AUTH CHECK
+    ======================================================== */
+    async function checkAuth() {
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error || !data.session) {
+        window.location.href = "admin-login.html";
+        return false;
+      }
+      return true;
     }
 
     document.addEventListener("DOMContentLoaded", () => {
       const logoutBtn = document.getElementById("logoutBtn");
       if (logoutBtn) {
-        logoutBtn.addEventListener("click", () => {
-          localStorage.removeItem("adminLoggedIn");
+        logoutBtn.addEventListener("click", async () => {
+          await supabaseClient.auth.signOut();
           window.location.href = "admin-login.html";
         });
       }
@@ -440,7 +458,7 @@
         div.innerHTML = `
           <h3>${escapeHtml(post.title)}</h3>
           <p><strong>Emplacement :</strong> ${escapeHtml(post.location || "")}</p>
-          ${post.image_url ? `<p><img src="${post.image_url}" alt="" style="max-width:200px;border-radius:6px;margin:8px 0;"></p>` : ""}
+          ${sanitizeUrl(post.image_url) ? `<p><img src="${escapeHtml(sanitizeUrl(post.image_url))}" alt="" style="max-width:200px;border-radius:6px;margin:8px 0;"></p>` : ""}
           <p>${renderTextWithLinks(post.content || "")}</p>
           <div style="display:flex;gap:8px;margin-top:8px;">
             <button class="btn edit-post" data-id="${post.id}">Modifier</button>
@@ -496,9 +514,9 @@
           <h3>${escapeHtml(p.title)}</h3>
           <p><strong>Statut :</strong> ${escapeHtml(p.status || "")}</p>
           <p><strong>Dates :</strong> ${escapeHtml(p.start_date || "")} → ${escapeHtml(p.end_date || "En cours")}</p>
-          ${p.image ? `<p><img src="${p.image}" alt="" style="max-width:200px;border-radius:6px;margin:8px 0;"></p>` : ""}
+          ${sanitizeUrl(p.image) ? `<p><img src="${escapeHtml(sanitizeUrl(p.image))}" alt="" style="max-width:200px;border-radius:6px;margin:8px 0;"></p>` : ""}
           <p>${escapeHtml(p.description || "")}</p>
-          ${p.link ? `<p><a href="${p.link}" target="_blank" rel="noopener">Lien externe</a></p>` : ""}
+          ${sanitizeUrl(p.link) ? `<p><a href="${escapeHtml(sanitizeUrl(p.link))}" target="_blank" rel="noopener noreferrer">Lien externe</a></p>` : ""}
           <div style="display:flex;gap:8px;margin-top:8px;">
             <button class="btn delete-project" data-id="${p.id}">Supprimer</button>
           </div>
@@ -551,7 +569,7 @@
         div.innerHTML = `
           <h3>${escapeHtml(r.title)}</h3>
           <p><strong>Type :</strong> ${escapeHtml(r.type || "")} ${r.category ? `• <strong>Catégorie :</strong> ${escapeHtml(r.category)}` : ""}</p>
-          <p><a href="${r.link}" target="_blank" rel="noopener">Ouvrir le lien</a></p>
+          ${sanitizeUrl(r.link) ? `<p><a href="${escapeHtml(sanitizeUrl(r.link))}" target="_blank" rel="noopener noreferrer">Ouvrir le lien</a></p>` : ""}
           <p>${escapeHtml(r.description || "")}</p>
           <div style="display:flex;gap:8px;margin-top:8px;">
             <button class="btn delete-resource" data-id="${r.id}">Supprimer</button>
@@ -635,7 +653,20 @@
     /* =========================================================
        FORM SUBMISSIONS
     ======================================================== */
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
+      // Vérifier l'authentification
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error || !data.session) {
+        window.location.href = "admin-login.html";
+        return;
+      }
+
+      // Charger les données
+      loadPosts();
+      loadProjects();
+      loadResources();
+      loadReports();
+
       /* POSTS form */
       const postForm = document.getElementById("postForm");
       if (postForm) {
