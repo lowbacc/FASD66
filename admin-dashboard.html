@@ -78,6 +78,12 @@
               <textarea id="postContent" rows="6" required></textarea>
             </div>
 
+            <input type="hidden" id="postId" />
+
+            <p id="postEditNotice" style="display:none;margin:0 0 1rem;padding:0.75rem 1rem;border-radius:6px;background:#10233d;color:#d7e7ff;border:1px solid #204d86;">
+              Mode modification actif : les changements seront appliqués au post sélectionné.
+            </p>
+
             <div class="form-block">
               <label for="postLocation">Où publier ?</label>
               <select id="postLocation" required>
@@ -103,7 +109,10 @@
 
             <div id="previewWrap" aria-live="polite"></div>
 
-            <button type="submit" class="btn primary">Publier</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+              <button type="submit" id="postSubmitBtn" class="btn primary">Publier</button>
+              <button type="button" id="cancelPostEdit" class="btn" style="display:none;">Annuler la modification</button>
+            </div>
           </form>
 
           <h3 style="margin-top:2rem;">Posts existants</h3>
@@ -298,6 +307,61 @@
       return output.replace(/\n/g, "<br>");
     }
 
+    const postCache = new Map();
+
+    function getPostFormElements() {
+      return {
+        form: document.getElementById("postForm"),
+        idInput: document.getElementById("postId"),
+        titleInput: document.getElementById("postTitle"),
+        contentInput: document.getElementById("postContent"),
+        locationInput: document.getElementById("postLocation"),
+        fileInput: document.getElementById("imageFile"),
+        urlInput: document.getElementById("imageUrl"),
+        previewWrap: document.getElementById("previewWrap"),
+        submitBtn: document.getElementById("postSubmitBtn"),
+        cancelBtn: document.getElementById("cancelPostEdit"),
+        notice: document.getElementById("postEditNotice")
+      };
+    }
+
+    function resetPostEditMode() {
+      const { idInput, submitBtn, cancelBtn, notice } = getPostFormElements();
+
+      if (idInput) idInput.value = "";
+      if (submitBtn) submitBtn.textContent = "Publier";
+      if (cancelBtn) cancelBtn.style.display = "none";
+      if (notice) notice.style.display = "none";
+    }
+
+    function startPostEdit(post) {
+      const { idInput, titleInput, contentInput, locationInput, fileInput, urlInput, previewWrap, submitBtn, cancelBtn, notice, form } = getPostFormElements();
+
+      if (idInput) idInput.value = String(post.id);
+      if (titleInput) titleInput.value = post.title || "";
+      if (contentInput) contentInput.value = post.content || "";
+      if (locationInput) locationInput.value = post.location || "";
+      if (fileInput) fileInput.value = "";
+      if (urlInput) urlInput.value = "";
+
+      if (previewWrap) {
+        previewWrap.innerHTML = post.image_url
+          ? `
+            <p style="margin:0 0 8px;opacity:0.8;">Image actuelle :</p>
+            <img src="${escapeHtml(post.image_url)}" alt="" style="max-width:320px;max-height:240px;border-radius:6px;display:block;">
+          `
+          : "<p style=\"opacity:0.75;margin:0;\">Aucune image actuelle.</p>";
+      }
+
+      if (submitBtn) submitBtn.textContent = "Mettre à jour";
+      if (cancelBtn) cancelBtn.style.display = "inline-flex";
+      if (notice) notice.style.display = "block";
+
+      if (form && typeof form.scrollIntoView === "function") {
+        form.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
     async function uploadImageAndGetUrl(file) {
       if (!file) return null;
 
@@ -366,8 +430,10 @@
       }
 
       postsList.innerHTML = "";
+      postCache.clear();
 
       data.forEach(post => {
+        postCache.set(String(post.id), post);
         const div = document.createElement("div");
         div.className = "admin-card";
 
@@ -377,6 +443,7 @@
           ${post.image_url ? `<p><img src="${post.image_url}" alt="" style="max-width:200px;border-radius:6px;margin:8px 0;"></p>` : ""}
           <p>${renderTextWithLinks(post.content || "")}</p>
           <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn edit-post" data-id="${post.id}">Modifier</button>
             <button class="btn delete-post" data-id="${post.id}">Supprimer</button>
           </div>
         `;
@@ -572,12 +639,25 @@
       /* POSTS form */
       const postForm = document.getElementById("postForm");
       if (postForm) {
+        const postId = document.getElementById("postId");
         const postTitle = document.getElementById("postTitle");
         const postContent = document.getElementById("postContent");
         const postLocation = document.getElementById("postLocation");
         const fileInput = document.getElementById("imageFile");
         const urlInput = document.getElementById("imageUrl");
         const previewWrap = document.getElementById("previewWrap");
+        const submitBtn = document.getElementById("postSubmitBtn");
+        const cancelBtn = document.getElementById("cancelPostEdit");
+
+        resetPostEditMode();
+
+        if (cancelBtn) {
+          cancelBtn.addEventListener("click", () => {
+            postForm.reset();
+            resetPostEditMode();
+            if (previewWrap) previewWrap.innerHTML = "";
+          });
+        }
 
         if (fileInput && previewWrap) {
           fileInput.addEventListener("change", () => {
@@ -606,15 +686,16 @@
           const location = postLocation ? postLocation.value : "";
           const urlField = urlInput ? urlInput.value.trim() : "";
           const file = fileInput ? fileInput.files[0] : null;
+          const editingPostId = postId ? postId.value : "";
+          const existingPost = editingPostId ? postCache.get(editingPostId) : null;
 
           if (!title) { alert("Merci de renseigner un titre."); return; }
           if (!location) { alert("Merci de choisir une destination de publication."); return; }
 
           try {
-            let imageUrl = null;
+            let imageUrl = existingPost ? (existingPost.image_url || null) : null;
 
             if (file) {
-              const submitBtn = postForm.querySelector('button[type="submit"]');
               const originalText = submitBtn ? submitBtn.textContent : null;
               if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Upload en cours…"; }
 
@@ -625,21 +706,26 @@
               imageUrl = urlField;
             }
 
-            const { error } = await supabaseClient
-              .from("posts")
-              .insert({
-                title,
-                content,
-                image_url: imageUrl,
-                location
-              });
+            const payload = {
+              title,
+              content,
+              image_url: imageUrl,
+              location
+            };
+
+            const query = editingPostId
+              ? supabaseClient.from("posts").update(payload).eq("id", editingPostId)
+              : supabaseClient.from("posts").insert(payload);
+
+            const { error } = await query;
 
             if (error) {
-              alert("Erreur création post : " + error.message);
+              alert(editingPostId ? "Erreur mise à jour post : " + error.message : "Erreur création post : " + error.message);
               return;
             }
 
             postForm.reset();
+            resetPostEditMode();
             if (previewWrap) previewWrap.innerHTML = "";
             loadPosts();
           } catch (err) {
@@ -761,8 +847,15 @@
         };
       }
 
-      /* Delegation delete buttons */
+      /* Delegation buttons */
       document.addEventListener("click", (e) => {
+        const editPost = e.target.closest(".edit-post");
+        if (editPost) {
+          const post = postCache.get(editPost.dataset.id);
+          if (post) startPostEdit(post);
+          return;
+        }
+
         const delPost = e.target.closest(".delete-post");
         if (delPost) { deletePost(delPost.dataset.id); return; }
 
