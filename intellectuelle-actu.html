@@ -86,6 +86,46 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbmhjYWljZ3p2YXZvcWNudmJtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkyNDgwNTQsImV4cCI6MjA4NDgyNDA1NH0.PG_hpNFzZH9zGAVngpgKYUnS8_9LO7PHY72ilGojAXU"
     );
 
+    function escapeHtml(str) {
+      if (!str && str !== 0) return "";
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function renderTextWithLinks(text) {
+      const value = String(text ?? "");
+      const urlRegex = /(?:https?:\/\/|www\.)[^\s<]+/gi;
+      let output = "";
+      let lastIndex = 0;
+      let match;
+
+      while ((match = urlRegex.exec(value)) !== null) {
+        const rawUrl = match[0];
+        let url = rawUrl;
+        let trailing = "";
+
+        while (/[.,!?;:)\]]$/.test(url)) {
+          trailing = url.slice(-1) + trailing;
+          url = url.slice(0, -1);
+        }
+
+        output += escapeHtml(value.slice(lastIndex, match.index));
+
+        const href = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+        output += `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a>`;
+        output += escapeHtml(trailing);
+
+        lastIndex = match.index + rawUrl.length;
+      }
+
+      output += escapeHtml(value.slice(lastIndex));
+      return output.replace(/\n/g, "<br>");
+    }
+
     async function loadPosts() {
       const { data, error } = await supabaseClient
         .from("posts")
@@ -112,25 +152,25 @@
         const date = new Date(post.created_at).toLocaleDateString("fr-FR");
 
         div.innerHTML = `
-          <h3>${post.title}</h3>
+          <h3>${escapeHtml(post.title || "")}</h3>
           <p style="opacity:0.7;font-size:0.9rem;">Publié le ${date}</p>
 
           ${post.image_url ? `
             <img 
               src="${post.image_url}" 
-              alt="${post.title}" 
+              alt="${escapeHtml(post.title || "")}" 
               style="width:100%;max-width:600px;border-radius:6px;margin:1rem 0;"
             >
           ` : ""}
 
-          <p style="margin-top:0.5rem;">${post.content}</p>
+          <p style="margin-top:0.5rem;">${renderTextWithLinks(post.content || "")}</p>
 
           <div style="margin-top:1rem; display:flex; gap:1rem;">
-            <button class="btn share-btn" data-title="${post.title}" data-content="${post.content}">
+            <button class="btn share-btn" data-title="${escapeHtml(post.title || "")}" data-content="${escapeHtml(post.content || "")}">
               Partager
             </button>
 
-            <button class="btn error-btn" data-title="${post.title}">
+            <button class="btn error-btn" data-title="${escapeHtml(post.title || "")}">
               Signaler une erreur
             </button>
           </div>

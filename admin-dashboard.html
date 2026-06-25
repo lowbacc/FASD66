@@ -268,6 +268,36 @@
         .replaceAll("'", "&#39;");
     }
 
+    function renderTextWithLinks(text) {
+      const value = String(text ?? "");
+      const urlRegex = /(?:https?:\/\/|www\.)[^\s<]+/gi;
+      let output = "";
+      let lastIndex = 0;
+      let match;
+
+      while ((match = urlRegex.exec(value)) !== null) {
+        const rawUrl = match[0];
+        let url = rawUrl;
+        let trailing = "";
+
+        while (/[.,!?;:)\]]$/.test(url)) {
+          trailing = url.slice(-1) + trailing;
+          url = url.slice(0, -1);
+        }
+
+        output += escapeHtml(value.slice(lastIndex, match.index));
+
+        const href = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+        output += `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a>`;
+        output += escapeHtml(trailing);
+
+        lastIndex = match.index + rawUrl.length;
+      }
+
+      output += escapeHtml(value.slice(lastIndex));
+      return output.replace(/\n/g, "<br>");
+    }
+
     async function uploadImageAndGetUrl(file) {
       if (!file) return null;
 
@@ -345,7 +375,7 @@
           <h3>${escapeHtml(post.title)}</h3>
           <p><strong>Emplacement :</strong> ${escapeHtml(post.location || "")}</p>
           ${post.image_url ? `<p><img src="${post.image_url}" alt="" style="max-width:200px;border-radius:6px;margin:8px 0;"></p>` : ""}
-          <p>${escapeHtml(post.content || "")}</p>
+          <p>${renderTextWithLinks(post.content || "")}</p>
           <div style="display:flex;gap:8px;margin-top:8px;">
             <button class="btn delete-post" data-id="${post.id}">Supprimer</button>
           </div>
