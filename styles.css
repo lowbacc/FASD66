@@ -243,7 +243,7 @@ body {
   align-items: flex-start;
   justify-content: center;
   min-height: 100vh;
-  padding: 40px 20px 24px;
+  padding: 8px 20px 18px;
   position: relative;
   overflow: hidden;
 }
@@ -257,11 +257,11 @@ body {
 }
 
 .homepage .logo-wrap {
-  width: min(196vmin, 1760px);
-  height: min(196vmin, 1760px);
+  width: min(300vmin, 2600px);
+  height: min(300vmin, 2600px);
   position: relative;
   margin: 0 auto;
-  margin-top: -16px;
+  margin-top: -84px;
   opacity: 0;
   transform: scale(0.965);
   transition: opacity 0.35s ease, transform 0.35s ease;
@@ -345,12 +345,12 @@ body {
 
 .homepage .logo-wrap.intro-open .logo-img.left,
 .homepage .logo-wrap.touched .logo-img.left {
-  transform: translateX(-40%);
+  transform: translateX(-62%);
 }
 
 .homepage .logo-wrap.intro-open .logo-img.right,
 .homepage .logo-wrap.touched .logo-img.right {
-  transform: translateX(40%);
+  transform: translateX(62%);
 }
 
 @keyframes logoAutoOpen {
