@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 
-<body class="admin-dashboard">
+<body class="admin-dashboard" data-admin-view="dashboard">
 
   <header class="site-header">
     <div class="header-inner">
@@ -27,11 +27,11 @@
       </div>
 
       <nav class="admin-nav" aria-label="Navigation administrateur">
-        <a href="#dashboard">Aperçu</a>
-        <a href="#posts">Posts</a>
-        <a href="#projects">Projets</a>
-        <a href="#resources">Ressources</a>
-        <a href="#reports">Signalements</a>
+        <button type="button" class="admin-nav-link is-active" data-admin-view="dashboard">Aperçu</button>
+        <button type="button" class="admin-nav-link" data-admin-view="posts">Posts</button>
+        <button type="button" class="admin-nav-link" data-admin-view="projects">Projets</button>
+        <button type="button" class="admin-nav-link" data-admin-view="resources">Ressources</button>
+        <button type="button" class="admin-nav-link" data-admin-view="reports">Signalements</button>
       </nav>
 
       <div class="sidebar-card">
@@ -78,7 +78,7 @@
               <span class="eyebrow">Derniers posts</span>
               <h3>Les plus récents</h3>
             </div>
-            <a class="panel-anchor" href="#posts">Voir tout</a>
+            <button type="button" class="panel-anchor" data-admin-view="posts">Voir tout</button>
           </div>
           <div id="latestPostsList" class="compact-list" aria-live="polite"></div>
         </article>
@@ -89,14 +89,14 @@
               <span class="eyebrow">Derniers signalements</span>
               <h3>Remontées récentes</h3>
             </div>
-            <a class="panel-anchor" href="#reports">Voir tout</a>
+            <button type="button" class="panel-anchor" data-admin-view="reports">Voir tout</button>
           </div>
           <div id="latestReportsList" class="compact-list" aria-live="polite"></div>
         </article>
       </section>
 
       <!-- POSTS -->
-      <section id="posts" class="admin-section">
+      <section id="posts" class="admin-section admin-pane">
         <div class="section-header">
           <h2>Créer un post</h2>
           <span class="toggle-icon">▶</span>
@@ -157,7 +157,7 @@
       </section>
 
       <!-- PROJETS -->
-      <section id="projects" class="admin-section">
+      <section id="projects" class="admin-section admin-pane">
         <div class="section-header">
           <h2>Créer un projet</h2>
           <span class="toggle-icon">▶</span>
@@ -221,7 +221,7 @@
       </section>
 
       <!-- RESSOURCES -->
-      <section id="resources" class="admin-section">
+      <section id="resources" class="admin-section admin-pane">
         <div class="section-header">
           <h2>Ajouter une ressource</h2>
           <span class="toggle-icon">▶</span>
@@ -270,7 +270,7 @@
       </section>
 
       <!-- SIGNALEMENTS -->
-      <section id="reports" class="admin-section">
+      <section id="reports" class="admin-section admin-pane">
         <div class="section-header">
           <h2>Signalements d’erreurs</h2>
           <span class="toggle-icon">▶</span>
@@ -928,6 +928,29 @@
         return;
       }
 
+      const adminViewButtons = document.querySelectorAll(".admin-nav-link[data-admin-view], .panel-anchor[data-admin-view]");
+      const adminPanes = document.querySelectorAll(".admin-pane");
+
+      function setAdminView(view) {
+        document.body.setAttribute("data-admin-view", view);
+
+        adminViewButtons.forEach((button) => {
+          button.classList.toggle("is-active", button.dataset.adminView === view);
+        });
+
+        adminPanes.forEach((pane) => {
+          pane.classList.toggle("is-active", pane.id === view);
+        });
+      }
+
+      adminViewButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          setAdminView(button.dataset.adminView || "dashboard");
+        });
+      });
+
+      setAdminView(document.body.getAttribute("data-admin-view") || "dashboard");
+
       // Charger les données
       renderDashboardOverview();
       loadPosts();
@@ -1182,17 +1205,6 @@
 
         const delReport = e.target.closest(".delete-report");
         if (delReport) { deleteReport(delReport.dataset.id); return; }
-      });
-
-      /* Toggle sections */
-      document.querySelectorAll(".admin-section").forEach(section => {
-        const header = section.querySelector(".section-header");
-        const content = section.querySelector(".section-content");
-        if (!header || !content) return;
-        header.addEventListener("click", () => {
-          const isOpen = section.classList.toggle("open");
-          content.style.display = isOpen ? "block" : "none";
-        });
       });
 
       /* Initial load */
