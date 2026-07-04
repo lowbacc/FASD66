@@ -243,7 +243,7 @@ body {
   align-items: flex-start;
   justify-content: center;
   min-height: 100vh;
-  padding: 8px 20px 18px;
+  padding: 0 20px 12px;
   position: relative;
   overflow: hidden;
 }
@@ -257,11 +257,11 @@ body {
 }
 
 .homepage .logo-wrap {
-  width: min(300vmin, 2600px);
-  height: min(300vmin, 2600px);
+  width: min(92vmin, 1440px);
+  height: min(92vmin, 1440px);
   position: relative;
   margin: 0 auto;
-  margin-top: -84px;
+  margin-top: 0;
   opacity: 0;
   transform: scale(0.965);
   transition: opacity 0.35s ease, transform 0.35s ease;
