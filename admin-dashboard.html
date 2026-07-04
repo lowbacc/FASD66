@@ -5,67 +5,95 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FASD — Admin Dashboard</title>
   <link rel="stylesheet" href="styles.css" />
-
-  <style>
-    .admin-section {
-      background: #1a1a1a;
-      padding: 1.2rem;
-      border-radius: 8px;
-      margin: 1.5rem 0;
-      border: 1px solid #333;
-    }
-    .section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      user-select: none;
-      padding: 0.3rem 0;
-    }
-    .section-header h2 { margin: 0; font-size: 1.2rem; }
-    .toggle-icon { font-size: 1.4rem; opacity: 0.7; transition: transform 0.2s ease; }
-    .admin-section.open .toggle-icon { transform: rotate(90deg); }
-    .section-content { display: none; margin-top: 1rem; animation: fadeIn 0.25s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-    .form-block { margin-bottom: 1rem; }
-    input, textarea, select {
-      width: 100%; padding: 0.6rem; border-radius: 6px;
-      border: 1px solid #444; background: #111; color: white; font-size: 1rem;
-    }
-    textarea { resize: vertical; }
-    .admin-card {
-      background: #222; padding: 1rem; border-radius: 6px;
-      margin: 1rem 0; border: 1px solid #333;
-    }
-    .btn {
-      padding: 0.6rem 1rem; border-radius: 6px; border: none;
-      cursor: pointer; background: #444; color: white; font-size: 1rem;
-    }
-    .btn.primary { background: #0055ff; }
-    .btn:hover { opacity: 0.85; }
-    #previewWrap img, #projectPreviewWrap img {
-      display:block; max-width:320px; border-radius:6px; margin-top:8px;
-    }
-  </style>
 </head>
 
-<body>
+<body class="admin-dashboard">
 
   <header class="site-header">
     <div class="header-inner">
       <a class="logo-link" href="index.html" aria-label="Retour à l’accueil FASD">
         <img class="logo-small" src="assets/logo.svg" alt="FASD" />
       </a>
+      <a class="header-admin-link" href="index.html">Retour au site</a>
     </div>
   </header>
 
-  <main class="page-main">
-    <div class="page-content" style="max-width:900px;margin:auto;">
+  <main class="admin-shell">
+    <aside class="admin-sidebar">
+      <div class="sidebar-brand">
+        <span class="eyebrow">Tableau de bord</span>
+        <h1>Espace Administrateur</h1>
+        <p>Gérez les contenus de l’association, suivez les signalements et retrouvez les actions clés en un coup d’œil.</p>
+      </div>
 
-      <h1>Espace Administrateur</h1>
-      <p>Gérez les contenus de l’association : actualités, projets, ressources et signalements.</p>
+      <nav class="admin-nav" aria-label="Navigation administrateur">
+        <a href="#dashboard">Aperçu</a>
+        <a href="#posts">Posts</a>
+        <a href="#projects">Projets</a>
+        <a href="#resources">Ressources</a>
+        <a href="#reports">Signalements</a>
+      </nav>
 
-      <button id="logoutBtn" class="btn primary" style="margin-bottom:2rem;">Déconnexion</button>
+      <div class="sidebar-card">
+        <p class="sidebar-label">Session sécurisée</p>
+        <p>Connexion administrateur via Supabase Auth.</p>
+        <button id="logoutBtn" class="btn primary">Déconnexion</button>
+      </div>
+    </aside>
+
+    <div class="admin-main">
+      <section id="dashboard" class="admin-hero">
+        <div class="admin-hero-copy">
+          <span class="eyebrow">Vue d’ensemble</span>
+          <h2>Les derniers contenus en un coup d’œil</h2>
+          <p>Retrouvez les derniers posts, les derniers signalements et l’état général de la plateforme avant d’entrer dans les formulaires.</p>
+        </div>
+      </section>
+
+      <section class="admin-overview-grid" aria-label="Résumé de l’activité">
+        <article class="dashboard-stat">
+          <span class="stat-label">Posts</span>
+          <strong id="statPosts">0</strong>
+          <span>Publications récentes</span>
+        </article>
+        <article class="dashboard-stat">
+          <span class="stat-label">Projets</span>
+          <strong id="statProjects">0</strong>
+          <span>Initiatives suivies</span>
+        </article>
+        <article class="dashboard-stat">
+          <span class="stat-label">Ressources</span>
+          <strong id="statResources">0</strong>
+          <span>Documents et liens</span>
+        </article>
+        <article class="dashboard-stat">
+          <span class="stat-label">Signalements</span>
+          <strong id="statReports">0</strong>
+          <span>Remontées à traiter</span>
+        </article>
+
+        <article class="dashboard-panel dashboard-panel-wide">
+          <div class="panel-header">
+            <div>
+              <span class="eyebrow">Derniers posts</span>
+              <h3>Les plus récents</h3>
+            </div>
+            <a class="panel-anchor" href="#posts">Voir tout</a>
+          </div>
+          <div id="latestPostsList" class="compact-list" aria-live="polite"></div>
+        </article>
+
+        <article class="dashboard-panel dashboard-panel-wide">
+          <div class="panel-header">
+            <div>
+              <span class="eyebrow">Derniers signalements</span>
+              <h3>Remontées récentes</h3>
+            </div>
+            <a class="panel-anchor" href="#reports">Voir tout</a>
+          </div>
+          <div id="latestReportsList" class="compact-list" aria-live="polite"></div>
+        </article>
+      </section>
 
       <!-- POSTS -->
       <section id="posts" class="admin-section">
@@ -88,7 +116,7 @@
 
             <input type="hidden" id="postId" />
 
-            <p id="postEditNotice" style="display:none;margin:0 0 1rem;padding:0.75rem 1rem;border-radius:6px;background:#10233d;color:#d7e7ff;border:1px solid #204d86;">
+            <p id="postEditNotice" class="edit-notice" style="display:none;">
               Mode modification actif : les changements seront appliqués au post sélectionné.
             </p>
 
@@ -103,7 +131,7 @@
               </select>
             </div>
 
-            <hr style="border-color:#222;margin:12px 0;" />
+            <hr class="section-divider" />
 
             <div class="form-block">
               <label for="imageFile">Image depuis l'appareil (optionnel)</label>
@@ -115,15 +143,15 @@
               <input type="url" id="imageUrl" placeholder="https://..." />
             </div>
 
-            <div id="previewWrap" aria-live="polite"></div>
+            <div id="previewWrap" class="preview-wrap" aria-live="polite"></div>
 
-            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <div class="button-row">
               <button type="submit" id="postSubmitBtn" class="btn primary">Publier</button>
               <button type="button" id="cancelPostEdit" class="btn" style="display:none;">Annuler la modification</button>
             </div>
           </form>
 
-          <h3 style="margin-top:2rem;">Posts existants</h3>
+          <h3 class="section-subtitle">Posts existants</h3>
           <div id="postsList"></div>
         </div>
       </section>
@@ -172,7 +200,7 @@
               <input type="url" id="projectImage" placeholder="https://..." />
             </div>
 
-            <div id="projectPreviewWrap" aria-live="polite"></div>
+            <div id="projectPreviewWrap" class="preview-wrap" aria-live="polite"></div>
 
             <div class="form-block">
               <label for="projectLink">Lien externe</label>
@@ -187,7 +215,7 @@
             <button type="submit" class="btn primary">Enregistrer</button>
           </form>
 
-          <h3 style="margin-top:2rem;">Projets existants</h3>
+          <h3 class="section-subtitle">Projets existants</h3>
           <div id="projectsList"></div>
         </div>
       </section>
@@ -236,7 +264,7 @@
             <button type="submit" class="btn primary">Enregistrer</button>
           </form>
 
-          <h3 style="margin-top:2rem;">Ressources existantes</h3>
+          <h3 class="section-subtitle">Ressources existantes</h3>
           <div id="resourcesList"></div>
         </div>
       </section>
@@ -326,6 +354,100 @@
     }
 
     const postCache = new Map();
+    const dashboardState = {
+      posts: [],
+      projects: [],
+      resources: [],
+      reports: []
+    };
+
+    const locationLabels = {
+      "physique-actu": "Actualités Défense Physique",
+      "intellectuelle-actu": "Actualités Défense Intellectuelle",
+      "physique-presse": "Presse Défense Physique",
+      "intellectuelle-presse": "Presse Défense Intellectuelle"
+    };
+
+    function formatDashboardDate(value) {
+      if (!value) return "";
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      return date.toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+    }
+
+    function truncateText(value, limit = 120) {
+      const text = String(value ?? "").trim();
+      if (!text) return "";
+      return text.length > limit ? `${text.slice(0, limit).trimEnd()}…` : text;
+    }
+
+    function renderCompactList(container, items, emptyLabel, renderItem) {
+      if (!container) return;
+
+      if (!items.length) {
+        container.innerHTML = `<p style="margin:0;color:var(--muted);">${escapeHtml(emptyLabel)}</p>`;
+        return;
+      }
+
+      container.innerHTML = items.map(renderItem).join("");
+    }
+
+    function renderDashboardOverview() {
+      const statPosts = document.getElementById("statPosts");
+      const statProjects = document.getElementById("statProjects");
+      const statResources = document.getElementById("statResources");
+      const statReports = document.getElementById("statReports");
+
+      if (statPosts) statPosts.textContent = String(dashboardState.posts.length);
+      if (statProjects) statProjects.textContent = String(dashboardState.projects.length);
+      if (statResources) statResources.textContent = String(dashboardState.resources.length);
+      if (statReports) statReports.textContent = String(dashboardState.reports.length);
+
+      const latestPostsList = document.getElementById("latestPostsList");
+      const latestReportsList = document.getElementById("latestReportsList");
+
+      renderCompactList(
+        latestPostsList,
+        dashboardState.posts.slice(0, 3),
+        "Aucun post publié pour le moment.",
+        (post) => {
+          const locationLabel = locationLabels[post.location] || post.location || "Emplacement inconnu";
+          return `
+            <article class="compact-item">
+              <h4>${escapeHtml(post.title || "Sans titre")}</h4>
+              <div class="compact-meta">
+                <span class="compact-badge">${escapeHtml(locationLabel)}</span>
+                <span>Ordre ${escapeHtml(post.sort_order ?? "n/a")}</span>
+                ${post.created_at ? `<span>${escapeHtml(formatDashboardDate(post.created_at))}</span>` : ""}
+              </div>
+              <p>${escapeHtml(truncateText(post.content || "", 140))}</p>
+            </article>
+          `;
+        }
+      );
+
+      renderCompactList(
+        latestReportsList,
+        dashboardState.reports.slice(0, 3),
+        "Aucun signalement pour le moment.",
+        (report) => {
+          return `
+            <article class="compact-item">
+              <h4>${escapeHtml(report.post_title || "Signalement")}</h4>
+              <div class="compact-meta">
+                <span class="compact-badge">Report</span>
+                ${report.created_at ? `<span>${escapeHtml(formatDashboardDate(report.created_at))}</span>` : ""}
+              </div>
+              <p>${escapeHtml(truncateText(report.message || "", 160))}</p>
+            </article>
+          `;
+        }
+      );
+    }
 
     function getPostFormElements() {
       return {
@@ -453,6 +575,8 @@
       if (error) {
         postsList.innerHTML = "<p>Erreur de chargement des posts</p>";
         console.error(error);
+        dashboardState.posts = [];
+        renderDashboardOverview();
         return;
       }
 
@@ -464,6 +588,8 @@
 
       postsList.innerHTML = "";
       postCache.clear();
+      dashboardState.posts = data;
+      renderDashboardOverview();
 
       data.forEach(post => {
         postCache.set(String(post.id), post);
@@ -630,10 +756,14 @@
       if (error) {
         projectsList.innerHTML = "<p>Erreur de chargement des projets</p>";
         console.error(error);
+        dashboardState.projects = [];
+        renderDashboardOverview();
         return;
       }
 
       projectsList.innerHTML = "";
+      dashboardState.projects = data;
+      renderDashboardOverview();
 
       data.forEach(p => {
         const div = document.createElement("div");
@@ -686,10 +816,14 @@
       if (error) {
         resourcesList.innerHTML = "<p>Erreur de chargement des ressources</p>";
         console.error(error);
+        dashboardState.resources = [];
+        renderDashboardOverview();
         return;
       }
 
       resourcesList.innerHTML = "";
+      dashboardState.resources = data;
+      renderDashboardOverview();
 
       data.forEach(r => {
         const div = document.createElement("div");
@@ -740,10 +874,14 @@
       if (error) {
         reportsList.innerHTML = "<p>Erreur de chargement des signalements</p>";
         console.error(error);
+        dashboardState.reports = [];
+        renderDashboardOverview();
         return;
       }
 
       reportsList.innerHTML = "";
+      dashboardState.reports = data;
+      renderDashboardOverview();
 
       data.forEach(rep => {
         const div = document.createElement("div");
@@ -791,6 +929,7 @@
       }
 
       // Charger les données
+      renderDashboardOverview();
       loadPosts();
       loadProjects();
       loadResources();
