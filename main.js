@@ -12,12 +12,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const wrap = document.getElementById('logoWrap');
   if (wrap) {
     if (document.body.classList.contains('homepage')) {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          document.body.classList.add('is-intro-ready');
-          wrap.classList.add('intro-open');
-        });
-      });
+      window.setTimeout(() => {
+        document.body.classList.add('is-intro-ready');
+        wrap.classList.add('intro-open');
+      }, 1000);
     }
 
     let touched = false;
