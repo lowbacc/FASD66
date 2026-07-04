@@ -17,42 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
         wrap.classList.add('intro-open');
       }, 2000);
     }
-
-    let touched = false;
-    wrap.addEventListener('touchstart', (e) => {
-      if (!touched) {
-        wrap.classList.add('touched');
-        touched = true;
-        e.preventDefault();
-        setTimeout(() => { touched = false; wrap.classList.remove('touched'); }, 4000);
-      }
-    }, { passive: false });
-
-    wrap.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        wrap.classList.toggle('touched');
-      }
-      if (e.key === 'Escape') wrap.classList.remove('touched');
-    });
-
-    document.addEventListener('click', (e) => {
-      if (!wrap.contains(e.target)) {
-        wrap.classList.remove('touched');
-        touched = false;
-      }
-    });
-
-    const halves = wrap.querySelectorAll('.half');
-    halves.forEach(h => {
-      h.addEventListener('click', (ev) => {
-        if (!wrap.classList.contains('touched')) {
-          ev.preventDefault();
-          wrap.classList.add('touched');
-          setTimeout(() => { wrap.classList.remove('touched'); }, 3000);
-        }
-      });
-    });
   }
 
   /* ---------------------------------------------------------
