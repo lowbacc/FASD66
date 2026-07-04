@@ -1,5 +1,5 @@
 // Nom du cache (change la version pour forcer la mise à jour)
-const CACHE_VERSION = "v5-fasd";
+const CACHE_VERSION = "v6-fasd";
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 
 // Fichiers statiques à mettre en cache
@@ -48,6 +48,22 @@ self.addEventListener("fetch", event => {
   // Ne jamais mettre en cache les pages HTML
   if (request.headers.get("accept")?.includes("text/html")) {
     event.respondWith(fetch(request).catch(() => fetch("/index.html")));
+    return;
+  }
+
+  const requestUrl = new URL(request.url);
+  const isCoreAsset = requestUrl.pathname.endsWith("/styles.css") || requestUrl.pathname.endsWith("/main.js") || requestUrl.pathname.endsWith("/assets/logo.svg");
+
+  if (isCoreAsset) {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          const clone = response.clone();
+          caches.open(STATIC_CACHE).then(cache => cache.put(request, clone));
+          return response;
+        })
+        .catch(() => caches.match(request))
+    );
     return;
   }
 
