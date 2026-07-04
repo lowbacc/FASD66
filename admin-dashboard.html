@@ -448,6 +448,12 @@
         return;
       }
 
+      if (data.some(post => post.sort_order === null || post.sort_order === undefined)) {
+        await normalizePostSortOrders(data);
+        loadPosts();
+        return;
+      }
+
       postsList.innerHTML = "";
       postCache.clear();
 
@@ -488,6 +494,48 @@
       }
 
       loadPosts();
+    }
+
+    async function normalizePostSortOrders(posts) {
+      const byLocation = new Map();
+
+      posts.forEach(post => {
+        const location = post.location || "";
+        if (!byLocation.has(location)) {
+          byLocation.set(location, []);
+        }
+        byLocation.get(location).push(post);
+      });
+
+      for (const group of byLocation.values()) {
+        const missing = group.filter(post => post.sort_order === null || post.sort_order === undefined);
+        if (!missing.length) continue;
+
+        const existingOrders = group
+          .map(post => Number(post.sort_order))
+          .filter(order => Number.isFinite(order));
+        const startOrder = existingOrders.length ? Math.max(...existingOrders) + 1 : 1;
+
+        const orderedMissing = [...missing].sort((a, b) => {
+          const dateA = new Date(a.created_at || 0).getTime();
+          const dateB = new Date(b.created_at || 0).getTime();
+          return dateB - dateA;
+        });
+
+        for (let index = 0; index < orderedMissing.length; index += 1) {
+          const post = orderedMissing[index];
+          const nextOrder = startOrder + index;
+
+          const { error } = await supabaseClient
+            .from("posts")
+            .update({ sort_order: nextOrder })
+            .eq("id", post.id);
+
+          if (error) {
+            throw error;
+          }
+        }
+      }
     }
 
     async function getNextPostSortOrder(location) {

@@ -302,6 +302,18 @@ h2 { color: var(--text); margin-bottom: 8px; }
   color: var(--muted);
 }
 
+.site-footer .admin-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.site-footer .admin-link:hover {
+  color: var(--text);
+}
+
 /* =========================================================
    RESPONSIVE
 ========================================================= */
