@@ -257,8 +257,8 @@ body {
 }
 
 .homepage .logo-wrap {
-  width: min(92vmin, 1440px);
-  height: min(92vmin, 1440px);
+  width: min(102vmin, 1560px);
+  height: min(102vmin, 1560px);
   position: relative;
   margin: 0 auto;
   margin-top: 0;

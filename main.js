@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
       window.setTimeout(() => {
         document.body.classList.add('is-intro-ready');
         wrap.classList.add('intro-open');
-      }, 3000);
+      }, 2000);
     }
 
     let touched = false;
