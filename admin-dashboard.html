@@ -439,6 +439,7 @@
       const { data, error } = await supabaseClient
         .from("posts")
         .select("*")
+        .order("sort_order", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -458,9 +459,12 @@
         div.innerHTML = `
           <h3>${escapeHtml(post.title)}</h3>
           <p><strong>Emplacement :</strong> ${escapeHtml(post.location || "")}</p>
+          <p><strong>Ordre :</strong> ${escapeHtml(post.sort_order ?? "n/a")}</p>
           ${sanitizeUrl(post.image_url) ? `<p><img src="${escapeHtml(sanitizeUrl(post.image_url))}" alt="" style="max-width:200px;border-radius:6px;margin:8px 0;"></p>` : ""}
           <p>${renderTextWithLinks(post.content || "")}</p>
           <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn move-post-up" data-id="${post.id}">Monter</button>
+            <button class="btn move-post-down" data-id="${post.id}">Descendre</button>
             <button class="btn edit-post" data-id="${post.id}">Modifier</button>
             <button class="btn delete-post" data-id="${post.id}">Supprimer</button>
           </div>
@@ -480,6 +484,75 @@
 
       if (error) {
         alert("Erreur suppression post : " + error.message);
+        return;
+      }
+
+      loadPosts();
+    }
+
+    async function getNextPostSortOrder(location) {
+      const { data, error } = await supabaseClient
+        .from("posts")
+        .select("sort_order")
+        .eq("location", location)
+        .order("sort_order", { ascending: false, nullsFirst: false })
+        .limit(1);
+
+      if (error) throw error;
+
+      const currentMax = data?.[0]?.sort_order;
+      return Number.isFinite(currentMax) ? currentMax + 1 : 1;
+    }
+
+    async function movePost(id, direction) {
+      const currentPost = postCache.get(String(id));
+      if (!currentPost) return;
+
+      const currentOrder = Number(currentPost.sort_order);
+      if (!Number.isFinite(currentOrder)) {
+        alert("Ce post n'a pas encore d'ordre valide. Recharge la page après la migration SQL.");
+        return;
+      }
+
+      let neighborQuery = supabaseClient
+        .from("posts")
+        .select("id, sort_order")
+        .eq("location", currentPost.location)
+        .neq("id", currentPost.id);
+
+      if (direction === "up") {
+        neighborQuery = neighborQuery.lt("sort_order", currentOrder).order("sort_order", { ascending: false }).limit(1);
+      } else {
+        neighborQuery = neighborQuery.gt("sort_order", currentOrder).order("sort_order", { ascending: true }).limit(1);
+      }
+
+      const { data: neighbor, error } = await neighborQuery;
+
+      if (error) {
+        alert("Erreur de réordonnancement : " + error.message);
+        return;
+      }
+
+      const nextPost = neighbor?.[0];
+      if (!nextPost) return;
+
+      const { error: firstError } = await supabaseClient
+        .from("posts")
+        .update({ sort_order: nextPost.sort_order })
+        .eq("id", currentPost.id);
+
+      if (firstError) {
+        alert("Erreur de réordonnancement : " + firstError.message);
+        return;
+      }
+
+      const { error: secondError } = await supabaseClient
+        .from("posts")
+        .update({ sort_order: currentOrder })
+        .eq("id", nextPost.id);
+
+      if (secondError) {
+        alert("Erreur de réordonnancement : " + secondError.message);
         return;
       }
 
@@ -744,6 +817,10 @@
               location
             };
 
+            if (!editingPostId) {
+              payload.sort_order = await getNextPostSortOrder(location);
+            }
+
             const query = editingPostId
               ? supabaseClient.from("posts").update(payload).eq("id", editingPostId)
               : supabaseClient.from("posts").insert(payload);
@@ -880,6 +957,18 @@
 
       /* Delegation buttons */
       document.addEventListener("click", (e) => {
+        const moveUp = e.target.closest(".move-post-up");
+        if (moveUp) {
+          movePost(moveUp.dataset.id, "up");
+          return;
+        }
+
+        const moveDown = e.target.closest(".move-post-down");
+        if (moveDown) {
+          movePost(moveDown.dataset.id, "down");
+          return;
+        }
+
         const editPost = e.target.closest(".edit-post");
         if (editPost) {
           const post = postCache.get(editPost.dataset.id);

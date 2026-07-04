@@ -72,6 +72,7 @@ async function loadPostsByLocation(location) {
     .from("posts")
     .select("*")
     .eq("location", location)
+    .order("sort_order", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
 
   const container = document.createElement("div");

@@ -215,6 +215,19 @@ http://localhost:5000/admin-login.html
 - Vous êtes redirigé vers la page de login
 - Votre session Supabase est terminée
 
+### Étape 8 : Réordonner les posts
+
+1. Dans le dossier du projet, ouvrez `posts-order-migration.sql`
+2. Exécutez ce SQL dans l'éditeur Supabase pour ajouter le champ `sort_order`
+3. Rechargez l'admin dashboard
+4. Dans la liste des posts, utilisez les boutons **Monter** et **Descendre**
+
+✅ **Attendu** :
+- L'ordre des posts change immédiatement après chaque déplacement
+- Le nouvel ordre est conservé en base de données
+
+💡 Astuce : quand vous créez un nouveau post, il est ajouté à la fin de la liste. Vous pouvez ensuite le remonter à l'endroit voulu.
+
 ---
 
 ## Déployer en production
