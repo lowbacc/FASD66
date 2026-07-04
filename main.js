@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.body.classList.contains('homepage')) {
       window.setTimeout(() => {
         document.body.classList.add('is-intro-ready');
+        wrap.classList.add('intro-open');
       }, 120);
     }
 
