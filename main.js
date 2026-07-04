@@ -11,6 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
   --------------------------------------------------------- */
   const wrap = document.getElementById('logoWrap');
   if (wrap) {
+    if (document.body.classList.contains('homepage')) {
+      window.setTimeout(() => {
+        wrap.classList.add('intro-open');
+      }, 350);
+    }
+
     let touched = false;
     wrap.addEventListener('touchstart', (e) => {
       if (!touched) {
