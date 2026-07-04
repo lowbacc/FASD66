@@ -240,10 +240,10 @@ body {
 ========================================================= */
 .homepage .hero {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   min-height: 100vh;
-  padding: 96px 20px 32px;
+  padding: 40px 20px 24px;
   position: relative;
   overflow: hidden;
 }
@@ -257,10 +257,11 @@ body {
 }
 
 .homepage .logo-wrap {
-  width: min(98vmin, 1180px);
-  height: min(98vmin, 1180px);
+  width: min(196vmin, 1760px);
+  height: min(196vmin, 1760px);
   position: relative;
   margin: 0 auto;
+  margin-top: -16px;
   opacity: 0;
   transform: scale(0.965);
   transition: opacity 0.35s ease, transform 0.35s ease;
@@ -344,12 +345,12 @@ body {
 
 .homepage .logo-wrap.intro-open .logo-img.left,
 .homepage .logo-wrap.touched .logo-img.left {
-  transform: translateX(-28%);
+  transform: translateX(-40%);
 }
 
 .homepage .logo-wrap.intro-open .logo-img.right,
 .homepage .logo-wrap.touched .logo-img.right {
-  transform: translateX(28%);
+  transform: translateX(40%);
 }
 
 @keyframes logoAutoOpen {
@@ -367,9 +368,15 @@ body {
 }
 
 @media (max-width: 700px) {
+  .homepage .hero {
+    align-items: center;
+    padding-top: 82px;
+  }
+
   .homepage .logo-wrap {
     width: min(96vw, 820px);
     height: min(96vw, 820px);
+    margin-top: 0;
   }
 
   .homepage .branch-label {
