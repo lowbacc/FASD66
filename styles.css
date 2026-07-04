@@ -68,6 +68,27 @@ body {
 }
 .logo-link:hover .logo-small { transform: scale(1.06); }
 
+.header-admin-link {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.86rem;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.header-admin-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #fff;
+}
+
+.homepage .header-inner {
+  gap: 12px;
+}
+
 /* =========================================================
    NAVIGATION
 ========================================================= */
@@ -300,18 +321,6 @@ h2 { color: var(--text); margin-bottom: 8px; }
   padding: 20px;
   text-align: center;
   color: var(--muted);
-}
-
-.site-footer .admin-link {
-  display: inline-block;
-  margin-top: 8px;
-  color: var(--muted);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.site-footer .admin-link:hover {
-  color: var(--text);
 }
 
 /* =========================================================
