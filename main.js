@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (wrap) {
     if (document.body.classList.contains('homepage')) {
       window.setTimeout(() => {
-        wrap.classList.add('intro-open');
-      }, 350);
+        document.body.classList.add('is-intro-ready');
+      }, 120);
     }
 
     let touched = false;

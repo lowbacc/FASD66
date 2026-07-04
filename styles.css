@@ -243,7 +243,7 @@ body {
   align-items: center;
   justify-content: center;
   height: 100vh;
-  padding: 90px 20px 40px;
+  padding: 112px 20px 40px;
   position: relative;
   overflow: hidden;
 }
@@ -263,54 +263,26 @@ body {
   z-index: 1;
   width: min(1400px, 100%);
   display: grid;
-  grid-template-columns: minmax(240px, 1fr) minmax(280px, 1.25fr) minmax(240px, 1fr);
-  gap: 24px;
+  grid-template-columns: minmax(220px, 1fr) minmax(320px, 1.18fr) minmax(220px, 1fr);
+  gap: 18px;
   align-items: center;
-}
-
-.homepage .hero-copy {
-  grid-column: 1 / -1;
-  max-width: 760px;
-  margin: 0 auto 12px;
-  text-align: center;
-  animation: fadeInUp 700ms ease both;
-}
-
-.homepage .hero-kicker {
-  margin: 0 0 12px;
-  color: #c7d8e6;
-  font-size: 0.8rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.homepage .hero-copy h1 {
-  margin: 0;
-  color: #fff;
-  font-size: clamp(1.7rem, 3.2vw, 2.6rem);
-  line-height: 1.08;
-}
-
-.homepage .hero-lead {
-  margin: 14px auto 0;
-  max-width: 720px;
-  color: var(--muted);
-  font-size: 1rem;
 }
 
 .homepage .intro-panel {
   display: block;
   color: var(--text);
   text-decoration: none;
-  padding: 24px 22px;
+  padding: 22px 20px;
   border-radius: 18px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(6px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14);
-  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, opacity 0.35s ease;
   position: relative;
   overflow: hidden;
+  opacity: 0;
+  transform: translateY(12px);
 }
 
 .homepage .intro-panel::after {
@@ -330,8 +302,13 @@ body {
   background: rgba(255, 255, 255, 0.05);
 }
 
-.homepage .intro-panel-left { justify-self: end; animation: slideInLeft 780ms ease both 120ms; }
-.homepage .intro-panel-right { justify-self: start; animation: slideInRight 780ms ease both 220ms; }
+.homepage.is-intro-ready .intro-panel {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.homepage .intro-panel-left { justify-self: end; transition-delay: 120ms; }
+.homepage .intro-panel-right { justify-self: start; transition-delay: 220ms; }
 
 .homepage .intro-eyebrow {
   display: inline-block;
@@ -379,7 +356,9 @@ body {
   height: min(100vmin, 980px);
   position: relative;
   margin: 0 auto;
-  animation: logoPulse 1100ms ease both;
+  opacity: 0;
+  transform: scale(0.94);
+  transition: opacity 0.45s ease 120ms, transform 0.45s ease 120ms;
 }
 
 /* Zones cliquables UNIQUEMENT sur la page d'accueil */
@@ -415,6 +394,11 @@ body {
 .logo-wrap:hover .logo-img.left { transform: translateX(-18%); }
 .logo-wrap:hover .logo-img.right { transform: translateX(18%); }
 
+.homepage.is-intro-ready .logo-wrap {
+  opacity: 1;
+  transform: scale(1);
+}
+
 .homepage .logo-wrap.intro-open .logo-img.left,
 .homepage .logo-wrap.touched .logo-img.left {
   transform: translateX(-18%);
@@ -423,31 +407,6 @@ body {
 .homepage .logo-wrap.intro-open .logo-img.right,
 .homepage .logo-wrap.touched .logo-img.right {
   transform: translateX(18%);
-}
-
-.homepage .logo-wrap.intro-open .half.left,
-.homepage .logo-wrap.intro-open .half.right {
-  animation: glowPulse 900ms ease both;
-}
-
-@keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-24px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes slideInRight {
-  from { opacity: 0; transform: translateX(24px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes logoPulse {
-  0% { opacity: 0; transform: scale(0.94); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes glowPulse {
